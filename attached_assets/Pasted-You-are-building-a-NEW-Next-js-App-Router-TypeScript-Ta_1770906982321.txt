@@ -1,0 +1,169 @@
+You are building a NEW Next.js (App Router) + TypeScript + Tailwind project called “Meritrix” (MVP). Follow a senior-engineering rule: establish a premium baseline (design tokens + spacing + core components + layouts) BEFORE any business features. Do NOT implement worksheets/drills/live/admin CRUD/auth/Prisma/Stripe yet. This run is ONLY for skeleton + premium UI baseline.
+
+NON-NEGOTIABLE QUALITY BAR:
+- Premium SaaS look: clean, calm, elegant, consistent spacing.
+- No vague spacing: use a tight spacing scale and consistent layout widths.
+- Perfect placement: align to a centered container, consistent vertical rhythm.
+- No pure black text anywhere. Use slate-like near-black tones.
+- Theme toggle changes ONLY colors (primary/accent/small highlights). Layout/typography stay the same.
+- Default brand theme = Deep Teal Intelligence.
+
+TECH:
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- No external UI libraries (no shadcn)
+- No backend logic, no Prisma, no Stripe in this run.
+
+GOAL (THIS RUN):
+1) Create route groups + layouts:
+   - app/(public)/layout.tsx + page.tsx
+   - app/(student)/layout.tsx + dashboard/page.tsx
+   - app/(admin)/layout.tsx + admin/page.tsx
+2) Create premium design token system (Deep Teal default + Lavender optional) using CSS variables.
+3) Create 6 core components in app/_components:
+   - Button.tsx (primary/secondary/ghost, disabled, loading)
+   - Input.tsx (label, hint, error)
+   - Card.tsx (Card, CardHeader, CardBody)
+   - Badge.tsx
+   - Modal.tsx (generic, accessible)
+   - ProgressBar.tsx
+4) Add minimal navbars:
+   - PublicNavbar: Home, Worksheets, Merit Drills, Live Sessions, Pricing, Login
+   - StudentNavbar: Dashboard, Worksheets, Merit Drills, Live Sessions, Profile
+   - AdminNavbar: Dashboard + placeholder links
+   Include a ThemeToggle in all navbars.
+5) Theme behavior:
+   - Themes: “teal” (default) and “lavender” (optional)
+   - Only token colors change (primary, soft, ring, progress). Everything else stays identical.
+   - Store user theme in localStorage for now (no DB yet).
+   - Apply theme via data-theme attribute on <html>.
+6) Pages must be minimal but premium:
+   - Home page: hero + 3 product cards + small pricing strip + CTA.
+   - Student dashboard: placeholder cards + progress examples.
+   - Admin page: placeholder cards + links.
+
+VISUAL DESIGN RULES (PREMIUM BASELINE):
+- Global max content width: 1100px
+- Use consistent padding: page sections py-16, inner px-6, card padding p-6
+- Use consistent gap: gap-6 for grids, gap-4 for stacks
+- Border: subtle (slate-200-ish)
+- Shadows: very soft, minimal
+- Background: soft neutral, NOT pure white:
+  - app background: #F8FAFC
+  - card surface: #FFFFFF
+- Text colors (NO BLACK):
+  - primary text: #0F172A
+  - secondary: #334155
+  - muted: #64748B
+- Avoid gradients and animations for this run.
+
+THEME TOKENS (CSS VARIABLES):
+Base (fixed, same in both themes):
+--bg: #F8FAFC
+--surface: #FFFFFF
+--border: #E2E8F0
+--text: #0F172A
+--text-2: #334155
+--muted: #64748B
+
+Theme (switchable):
+Deep Teal (default, data-theme="teal"):
+--primary: #0F5C5C
+--primary-soft: #E6F4F4
+--on-primary: #FFFFFF
+--ring: #1F7A7A
+--progress: #0F5C5C
+
+Lavender (optional, data-theme="lavender"):
+--primary: #5E5CE6
+--primary-soft: #ECEBFF
+--on-primary: #FFFFFF
+--ring: #7C7AF3
+--progress: #5E5CE6
+
+IMPLEMENTATION DETAILS:
+A) app/globals.css
+- Define the above CSS variables.
+- Set body background to var(--bg) and text to var(--text).
+- Define utility classes for container and section spacing if helpful.
+- Ensure focus ring uses --ring.
+
+B) app/layout.tsx
+- Set <html data-theme="teal"> as default.
+- Include globals.css.
+- No nav here (nav lives in route group layouts).
+
+C) Core components (app/_components)
+- Use Tailwind + CSS variables (via inline style or Tailwind arbitrary values).
+- Button:
+  - Primary: bg var(--primary), text var(--on-primary)
+  - Secondary: bg var(--primary-soft), text var(--primary), border var(--border)
+  - Ghost: transparent with hover bg slate-100-ish
+  - Loading state shows small spinner
+- Input:
+  - Border var(--border), bg var(--surface), text var(--text)
+  - Focus ring var(--ring)
+- Card:
+  - bg var(--surface), border var(--border), subtle shadow
+- Badge:
+  - default uses var(--primary-soft) + var(--primary)
+- Modal:
+  - Backdrop subtle
+  - ESC closes
+  - Click outside closes
+  - Keep it simple and accessible
+- ProgressBar:
+  - Track uses slate-like neutral
+  - Fill uses var(--progress)
+
+D) Navbars (in app/_components)
+Create:
+- PublicNavbar.tsx
+- StudentNavbar.tsx
+- AdminNavbar.tsx
+They must:
+- Use the same container width, aligned elements, consistent spacing
+- Left: brand word “Meritrix” (text only for now)
+- Center/Right: nav links (responsive: collapse to minimal on small screens)
+- Right: ThemeToggle button
+
+E) ThemeToggle.tsx
+- A small toggle (two buttons or a single toggle) to switch between teal and lavender.
+- Sets document.documentElement.dataset.theme = "teal" or "lavender"
+- Saves to localStorage key: "mx_theme"
+- On mount, reads localStorage and applies theme.
+
+F) Layouts:
+- app/(public)/layout.tsx:
+  - PublicNavbar + main + Footer
+- app/(student)/layout.tsx:
+  - StudentNavbar + main
+- app/(admin)/layout.tsx:
+  - AdminNavbar + main
+All layouts should wrap main content in a centered container (max-w-6xl-ish) with consistent padding.
+
+G) Pages:
+- app/(public)/page.tsx:
+  - Hero section with heading, subheading, 2 CTAs
+  - 3 feature cards (Worksheets, Merit Drills, Live Sessions)
+  - Small pricing strip (3 columns)
+  - Footer
+- app/(student)/dashboard/page.tsx:
+  - “Dashboard” heading
+  - 3 cards (Progress, XP, Upcoming sessions placeholder)
+  - ProgressBar usage
+- app/(admin)/admin/page.tsx:
+  - “Admin” heading
+  - Grid of placeholder admin sections
+
+IMPORTANT RULES:
+- Do NOT add auth, middleware, Prisma, Stripe, worksheets, drills, live booking flows yet.
+- Keep code production-quality and consistent.
+- Use semantic HTML.
+- Ensure everything looks aligned, not scattered.
+
+After implementing, output:
+1) The final file tree created/modified.
+2) Commands to run the dev server.
+Now proceed.
