@@ -7,6 +7,7 @@ import Modal from "../../../_components/Modal";
 import { Card, CardBody } from "../../../_components/Card";
 import { useToast } from "../../../_components/Toast";
 import Input from "../../../_components/Input";
+import { formatMoney } from "../../../../lib/utils/format-money";
 
 interface Package {
   id: string;
@@ -253,11 +254,11 @@ export default function PackagesPage() {
                         Slug: {pkg.slug}
                       </span>
                       <span className="text-xs font-medium" style={{ color: "var(--primary)" }}>
-                        Sale: ₹{pkg.salePrice || pkg.price}
+                        Sale: {formatMoney(pkg.salePrice || pkg.price)}
                       </span>
                       {pkg.mrp > 0 && (
                         <span className="text-xs" style={{ color: "var(--muted)" }}>
-                          MRP: ₹{pkg.mrp}
+                          MRP: {formatMoney(pkg.mrp)}
                         </span>
                       )}
                       <span className="text-xs" style={{ color: "var(--muted)" }}>
@@ -325,14 +326,14 @@ export default function PackagesPage() {
             />
           </div>
           <Input
-            label="MRP (₹)"
+            label="MRP (CAD)"
             type="number"
             value={form.mrp}
             onChange={(e) => setForm((f) => ({ ...f, mrp: Number(e.target.value) }))}
             hint="Original price before discount. Leave 0 to auto-compute."
           />
           <Input
-            label="Sale Price (₹)"
+            label="Sale Price (CAD)"
             type="number"
             value={form.salePrice}
             onChange={(e) => setForm((f) => ({ ...f, salePrice: Number(e.target.value) }))}
@@ -340,7 +341,7 @@ export default function PackagesPage() {
             required
           />
           <Input
-            label="Legacy Price (₹)"
+            label="Legacy Price (CAD)"
             type="number"
             value={form.price}
             onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))}

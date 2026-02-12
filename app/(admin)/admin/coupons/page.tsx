@@ -7,6 +7,7 @@ import Modal from "../../../_components/Modal";
 import { Card, CardBody } from "../../../_components/Card";
 import { useToast } from "../../../_components/Toast";
 import Input from "../../../_components/Input";
+import { formatMoney } from "../../../../lib/utils/format-money";
 
 interface Coupon {
   id: string;
@@ -250,7 +251,7 @@ export default function CouponsPage() {
                         {coupon.usageCount} / {coupon.maxUses !== null ? coupon.maxUses : "∞"} used
                       </span>
                       <span className="text-xs" style={{ color: "var(--muted)" }}>
-                        Min: ₹{coupon.minAmount}
+                        Min: {formatMoney(coupon.minAmount)}
                       </span>
                       <span className="text-xs" style={{ color: "var(--muted)" }}>
                         Expires: {formatDate(coupon.expiresAt)}
@@ -308,7 +309,7 @@ export default function CouponsPage() {
             hint="Leave empty for unlimited uses"
           />
           <Input
-            label="Minimum Amount (₹)"
+            label="Minimum Amount (CAD)"
             type="number"
             min={0}
             value={form.minAmount}

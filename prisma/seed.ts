@@ -25,20 +25,22 @@ async function main() {
 
   for (const grade of grades) {
     const subjects = [
-      { name: "Mathematics", slug: `math-${grade.sortOrder}`, price: 499 },
-      { name: "Science", slug: `science-${grade.sortOrder}`, price: 399 },
-      { name: "English", slug: `english-${grade.sortOrder}`, price: 349 },
+      { name: "Mathematics", slug: `math-${grade.sortOrder}`, mrp: 79, salePrice: 49 },
+      { name: "Science", slug: `science-${grade.sortOrder}`, mrp: 69, salePrice: 39 },
+      { name: "English", slug: `english-${grade.sortOrder}`, mrp: 59, salePrice: 34 },
     ];
 
     for (const subj of subjects) {
       const subject = await prisma.subject.upsert({
         where: { slug: subj.slug },
-        update: {},
+        update: { mrp: subj.mrp, salePrice: subj.salePrice, price: subj.salePrice },
         create: {
           gradeId: grade.id,
           name: subj.name,
           slug: subj.slug,
-          price: subj.price,
+          price: subj.salePrice,
+          mrp: subj.mrp,
+          salePrice: subj.salePrice,
           sortOrder: subjects.indexOf(subj),
         },
       });

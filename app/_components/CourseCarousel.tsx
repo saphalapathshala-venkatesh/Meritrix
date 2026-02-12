@@ -10,7 +10,7 @@ export interface Offering {
   gradeName: string;
   mrp: number;
   salePrice: number;
-  discountPercent: number;
+  discountPercent?: number;
   subjectCount?: number;
   isActive?: boolean;
   includesAllSubjects?: boolean;
@@ -104,7 +104,6 @@ export default function CourseCarousel({ offerings, onBuy, buyingId }: CourseCar
                 gradeName={o.gradeName}
                 mrp={o.mrp}
                 salePrice={o.salePrice}
-                discountPercent={o.discountPercent}
                 subjectCount={o.subjectCount}
                 onBuy={() => onBuy(o)}
                 buying={buyingId === o.id}

@@ -8,6 +8,7 @@ import Badge from "../../../../_components/Badge";
 import Modal from "../../../../_components/Modal";
 import Button from "../../../../_components/Button";
 import { loadRazorpayScript, openRazorpayCheckout } from "../../../../../lib/razorpay-checkout";
+import { formatMoney } from "../../../../../lib/utils/format-money";
 
 interface Worksheet {
   id: string;
@@ -30,6 +31,7 @@ interface SubjectInfo {
   name: string;
   gradeName: string;
   price: number;
+  salePrice: number;
   hasPurchased: boolean;
 }
 
@@ -249,7 +251,7 @@ export default function SubjectDetailPage() {
             loading={purchasing}
             style={{ height: "40px", fontSize: "14px" }}
           >
-            Buy for ₹{subject.price}
+            Buy for {formatMoney(subject.salePrice || subject.price)}
           </Button>
         ) : (
           <Badge>Free</Badge>
@@ -385,7 +387,7 @@ export default function SubjectDetailPage() {
               handleBuySubject();
             }}
           >
-            Buy for ₹{subject.price}
+            Buy for {formatMoney(subject.salePrice || subject.price)}
           </Button>
         </div>
       </Modal>

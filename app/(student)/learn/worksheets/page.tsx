@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "../../../_components/Card";
+import { formatMoney } from "../../../../lib/utils/format-money";
 
 interface Grade {
   id: string;
@@ -111,7 +112,7 @@ export default function WorksheetsPage() {
                         {s.name}
                       </h3>
                       <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>
-                        {s.price === 0 ? "Free" : `₹${s.price}`}
+                        {s.price === 0 ? "Free" : formatMoney(s.price)}
                       </p>
                     </div>
                     <div

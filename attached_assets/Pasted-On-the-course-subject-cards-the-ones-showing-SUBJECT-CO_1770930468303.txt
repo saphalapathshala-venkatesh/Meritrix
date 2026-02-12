@@ -1,0 +1,137 @@
+On the course/subject cards (the ones showing “SUBJECT COURSE”, title, grade, and price), keep the same spacing, typography, button style, border radius, and overall card cleanliness, but replace the single price line with a compact, premium price block that shows:
+
+MRP (struck-through, subtle)
+
+Sale/Current price (primary, bold)
+
+Discount percentage (small pill/badge, subtle)
+
+This must work for both Subject cards and Grade-pack cards.
+
+1) Data: ensure every purchasable item has both MRP + sale
+
+Do not hardcode in UI. Read from DB.
+
+Subject model should provide:
+
+mrp (or mrpCents)
+
+price (or salePriceCents)
+
+Package model should provide:
+
+mrp (or mrpCents)
+
+price (or salePriceCents)
+
+If the DB currently has only price, then:
+
+Add mrp fields and run migration
+
+Update admin forms so admin can set MRP + sale price
+
+Update seed to include realistic mrp > price
+
+2) Pricing math
+
+For each card:
+
+mrp = item.mrp
+
+sale = item.price
+
+discountPercent = mrp > 0 && mrp > sale ? Math.round(((mrp - sale) / mrp) * 100) : 0
+
+Rules:
+
+If discountPercent === 0, still show MRP (optional), but don’t show the % badge.
+
+Never show negative discounts.
+
+3) Currency formatting (CAD display)
+
+Replace ₹ display with CAD formatting:
+
+Create a helper:
+
+formatMoney(amount) using Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD" })
+
+If your stored values are integers:
+
+If stored in cents: use formatMoney(cents / 100)
+
+If stored as dollars: use formatMoney(dollars)
+
+Apply formatting consistently.
+
+4) UI: replace the single big price with a clean price block
+
+In the card where you currently render just one large price, replace it with this structure:
+
+Layout requirement: keep everything aligned left, same margins/padding as now.
+
+Price block (compact):
+
+Top row: MRP <striked> + optional small % OFF pill on the right
+
+Bottom row: Sale price (big/bold)
+
+Example structure (Tailwind guidance):
+
+Wrapper: mt-6 (or the same spacing you already used)
+
+Row 1: flex items-center gap-3
+
+MRP label: text-sm muted
+
+MRP value: text-sm line-through muted
+
+Discount pill (optional): ml-auto text-xs px-2 py-1 rounded-full with soft background matching theme
+
+Row 2: sale price: text-3xl font-semibold (keep current style if already big)
+
+Do not change button size, padding, radius, or placement.
+
+5) Keep cards clean (no clutter)
+
+Hard rules:
+
+Do not add extra sections, borders, or big badges.
+
+The discount badge must be small and subtle.
+
+Maintain current whitespace rhythm.
+
+6) Apply changes in both places
+
+Update the components/pages that render:
+
+Course carousel cards
+
+Pricing replacement section (course cards)
+
+Any “Buy Now” card list
+
+Ensure the same PriceBlock is reused (create a component):
+
+components/pricing/PriceBlock.tsx
+
+7) Edge cases
+
+If mrp is missing or mrp <= sale: show only sale price (no strike, no badge).
+
+If sale is missing: fallback gracefully with “Contact us” or disable buy button.
+
+8) Verification checklist
+
+After implementation:
+
+Cards still look exactly the same style/cleanliness
+
+Now show: MRP (struck) + Sale + % OFF
+
+Currency shown as CAD, not ₹
+
+Works for both subject courses and grade packs
+
+No layout jump / no overlaps on mobile

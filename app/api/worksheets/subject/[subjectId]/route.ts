@@ -77,6 +77,7 @@ export async function GET(
       name: subject.name,
       gradeName: subject.grade.name,
       price: subject.price,
+      salePrice: subject.salePrice,
       hasPurchased,
     },
     chapters,

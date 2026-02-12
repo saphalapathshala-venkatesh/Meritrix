@@ -7,6 +7,7 @@ import Modal from "../../../_components/Modal";
 import { Card, CardBody } from "../../../_components/Card";
 import { useToast } from "../../../_components/Toast";
 import Input from "../../../_components/Input";
+import { formatMoney } from "../../../../lib/utils/format-money";
 
 type View = "grades" | "subjects" | "chapters" | "worksheets";
 
@@ -292,8 +293,8 @@ export default function ContentPage() {
                     <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>{s.name}</p>
                     <div className="flex items-center gap-3 mt-1">
                       <span className="text-xs" style={{ color: "var(--muted)" }}>Slug: {s.slug}</span>
-                      <span className="text-xs" style={{ color: "var(--muted)" }}>Sale: ₹{s.salePrice || s.price}</span>
-                      {s.mrp > 0 && <span className="text-xs" style={{ color: "var(--muted)" }}>MRP: ₹{s.mrp}</span>}
+                      <span className="text-xs" style={{ color: "var(--muted)" }}>Sale: {formatMoney(s.salePrice || s.price)}</span>
+                      {s.mrp > 0 && <span className="text-xs" style={{ color: "var(--muted)" }}>MRP: {formatMoney(s.mrp)}</span>}
                       <span className="text-xs" style={{ color: "var(--muted)" }}>Sort: {s.sortOrder}</span>
                     </div>
                   </div>
@@ -368,9 +369,9 @@ export default function ContentPage() {
             <>
               <Input label="Name" value={formSubject.name} onChange={e => setFormSubject(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Mathematics" />
               <Input label="Slug" value={formSubject.slug} onChange={e => setFormSubject(f => ({ ...f, slug: e.target.value }))} placeholder="e.g. mathematics" />
-              <Input label="MRP (₹)" type="number" value={formSubject.mrp} onChange={e => setFormSubject(f => ({ ...f, mrp: Number(e.target.value) }))} hint="Original price before discount. Leave 0 to auto-compute." />
-              <Input label="Sale Price (₹)" type="number" value={formSubject.salePrice} onChange={e => setFormSubject(f => ({ ...f, salePrice: Number(e.target.value) }))} hint="Current selling price. If 0, uses legacy price field." />
-              <Input label="Legacy Price (₹)" type="number" value={formSubject.price} onChange={e => setFormSubject(f => ({ ...f, price: Number(e.target.value) }))} hint="Kept for backward compatibility." />
+              <Input label="MRP (CAD)" type="number" value={formSubject.mrp} onChange={e => setFormSubject(f => ({ ...f, mrp: Number(e.target.value) }))} hint="Original price before discount. Leave 0 to auto-compute." />
+              <Input label="Sale Price (CAD)" type="number" value={formSubject.salePrice} onChange={e => setFormSubject(f => ({ ...f, salePrice: Number(e.target.value) }))} hint="Current selling price. If 0, uses legacy price field." />
+              <Input label="Legacy Price (CAD)" type="number" value={formSubject.price} onChange={e => setFormSubject(f => ({ ...f, price: Number(e.target.value) }))} hint="Kept for backward compatibility." />
               <Input label="Sort Order" type="number" value={formSubject.sortOrder} onChange={e => setFormSubject(f => ({ ...f, sortOrder: Number(e.target.value) }))} />
             </>
           )}

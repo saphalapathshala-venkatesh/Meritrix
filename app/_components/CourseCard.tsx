@@ -1,12 +1,13 @@
 "use client";
 
+import PriceBlock from "./PriceBlock";
+
 interface CourseCardProps {
   type: "SUBJECT" | "GRADE_PACK";
   title: string;
   gradeName: string;
   mrp: number;
   salePrice: number;
-  discountPercent: number;
   subjectCount?: number;
   onBuy: () => void;
   buying: boolean;
@@ -18,12 +19,12 @@ export default function CourseCard({
   gradeName,
   mrp,
   salePrice,
-  discountPercent,
   subjectCount,
   onBuy,
   buying,
 }: CourseCardProps) {
   const tag = type === "SUBJECT" ? "Subject Course" : "Grade Pack";
+  const noPrice = !salePrice || salePrice <= 0;
 
   return (
     <div
@@ -62,31 +63,13 @@ export default function CourseCard({
           </p>
         )}
 
-        <div className="mt-auto pt-4 flex items-baseline gap-2 flex-wrap">
-          <span
-            className="text-xl font-bold"
-            style={{ color: "var(--text)" }}
-          >
-            ₹{salePrice}
-          </span>
-          {mrp > salePrice && (
-            <>
-              <span
-                className="text-sm line-through"
-                style={{ color: "var(--muted)" }}
-              >
-                ₹{mrp}
-              </span>
-              <span
-                className="text-[11px] font-semibold px-1.5 py-0.5 rounded"
-                style={{
-                  backgroundColor: "var(--primary-soft)",
-                  color: "var(--primary)",
-                }}
-              >
-                -{discountPercent}%
-              </span>
-            </>
+        <div className="mt-auto">
+          {noPrice ? (
+            <p className="mt-6 text-sm font-medium" style={{ color: "var(--muted)" }}>
+              Contact us
+            </p>
+          ) : (
+            <PriceBlock mrp={mrp} salePrice={salePrice} />
           )}
         </div>
       </div>
@@ -94,14 +77,14 @@ export default function CourseCard({
       <div className="px-5 pb-5">
         <button
           onClick={onBuy}
-          disabled={buying}
+          disabled={buying || noPrice}
           className="w-full rounded-lg py-2.5 text-sm font-semibold transition-opacity cursor-pointer disabled:opacity-60"
           style={{
             backgroundColor: "var(--primary)",
             color: "var(--on-primary)",
           }}
         >
-          {buying ? "Processing…" : "Buy Now"}
+          {buying ? "Processing…" : noPrice ? "Contact Us" : "Buy Now"}
         </button>
       </div>
     </div>

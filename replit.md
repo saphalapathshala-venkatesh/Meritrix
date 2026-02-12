@@ -4,6 +4,13 @@
 Meritrix is a premium learning platform MVP built with Next.js (App Router), TypeScript, Tailwind CSS, Prisma ORM, and PostgreSQL. The project has a premium UI skeleton with a design token system (Deep Teal + Lavender themes), and a production-ready database schema.
 
 ## Recent Changes
+- 2026-02-12: CAD Currency + Premium Price Block
+  - lib/utils/format-money.ts: formatMoney (CAD via Intl.NumberFormat) + computeDiscount helper
+  - PriceBlock component: MRP (strikethrough) + sale price (bold) + discount % pill (subtle)
+  - CourseCard uses PriceBlock; edge case: no price shows "Contact us"
+  - All ₹ symbols replaced with CAD formatting across student, admin, and public pages
+  - Seed data updated with realistic MRP > salePrice (e.g. Math MRP $79, sale $49)
+  - Subject detail API returns salePrice; admin form labels show CAD
 - 2026-02-12: Dynamic Course Offerings Carousel
   - Extended Subject and Package models with mrp (Max Retail Price) and salePrice fields
   - GET /api/public/offerings: returns subjects + grade packs with calculated discounts
