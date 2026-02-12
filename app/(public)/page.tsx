@@ -109,7 +109,7 @@ export default function HomePage() {
       <section className="mx-section" style={{ backgroundColor: "var(--surface)" }}>
         <div className="mx-container">
           <h2
-            className="text-2xl font-semibold text-center mb-10"
+            className="text-2xl font-semibold text-center text-balance mb-10"
             style={{ color: "var(--text)" }}
           >
             Everything you need to excel
@@ -141,14 +141,14 @@ export default function HomePage() {
                   style={{ backgroundColor: "var(--primary-soft)" }}
                 >
                   <h3
-                    className="font-semibold mb-2"
+                    className="font-semibold text-balance mb-2"
                     style={{ color: "var(--text)", fontSize: "15px", lineHeight: "1.4" }}
                   >
                     {f.title}
                   </h3>
                   <p
-                    className="text-sm flex-1"
-                    style={{ color: "var(--text-2)", lineHeight: "1.7", minHeight: "72px" }}
+                    className="text-sm text-pretty leading-7 break-words flex-1"
+                    style={{ color: "var(--text-2)", hyphens: "auto" }}
                   >
                     {f.description}
                   </p>
