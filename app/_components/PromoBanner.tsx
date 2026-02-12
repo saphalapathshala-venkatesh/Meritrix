@@ -32,19 +32,19 @@ export default function PromoBanner({
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to right, rgba(10, 50, 50, 0.88) 0%, rgba(10, 50, 50, 0.7) 50%, rgba(10, 50, 50, 0.45) 100%)",
+            "linear-gradient(to right, color-mix(in srgb, var(--primary-dark) 88%, transparent) 0%, color-mix(in srgb, var(--primary-dark) 70%, transparent) 50%, color-mix(in srgb, var(--primary-dark) 45%, transparent) 100%)",
         }}
       />
       <div className="relative flex flex-col justify-center h-full px-8 py-10 md:px-12 md:py-14 max-w-xl">
         <h3
           className="text-xl md:text-2xl font-bold tracking-tight mb-2"
-          style={{ color: "#FFFFFF", lineHeight: "1.3" }}
+          style={{ color: "var(--on-primary)", lineHeight: "1.3" }}
         >
           {title}
         </h3>
         <p
           className="text-sm md:text-base mb-6"
-          style={{ color: "rgba(255, 255, 255, 0.8)", lineHeight: "1.6" }}
+          style={{ color: "color-mix(in srgb, var(--on-primary) 80%, transparent)", lineHeight: "1.6" }}
         >
           {subtitle}
         </p>

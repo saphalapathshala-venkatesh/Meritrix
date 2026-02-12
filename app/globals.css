@@ -14,6 +14,7 @@
   --on-primary: #FFFFFF;
   --ring: #1F7A7A;
   --progress: #0F5C5C;
+  --primary-dark: #0A3232;
 }
 
 [data-theme="lavender"] {
@@ -22,6 +23,7 @@
   --on-primary: #FFFFFF;
   --ring: #7C7AF3;
   --progress: #5E5CE6;
+  --primary-dark: #2D2B70;
 }
 
 *,
