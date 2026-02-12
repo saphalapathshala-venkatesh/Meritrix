@@ -14,6 +14,8 @@ interface Package {
   slug: string;
   description: string | null;
   price: number;
+  mrp: number;
+  salePrice: number;
   isActive: boolean;
   subjectIds: string[];
   purchaseCount: number;
@@ -44,6 +46,8 @@ export default function PackagesPage() {
     slug: "",
     description: "",
     price: 0,
+    mrp: 0,
+    salePrice: 0,
     isActive: true,
     subjectIds: [] as string[],
   });
@@ -75,7 +79,7 @@ export default function PackagesPage() {
   const openAdd = () => {
     setModalMode("add");
     setEditId("");
-    setForm({ name: "", slug: "", description: "", price: 0, isActive: true, subjectIds: [] });
+    setForm({ name: "", slug: "", description: "", price: 0, mrp: 0, salePrice: 0, isActive: true, subjectIds: [] });
     setModalOpen(true);
   };
 
@@ -87,6 +91,8 @@ export default function PackagesPage() {
       slug: pkg.slug,
       description: pkg.description || "",
       price: pkg.price,
+      mrp: pkg.mrp || 0,
+      salePrice: pkg.salePrice || pkg.price,
       isActive: pkg.isActive,
       subjectIds: pkg.subjectIds || [],
     });
@@ -116,6 +122,8 @@ export default function PackagesPage() {
         slug: form.slug,
         description: form.description || null,
         price: Number(form.price),
+        mrp: Number(form.mrp),
+        salePrice: Number(form.salePrice),
         isActive: form.isActive,
         subjectIds: form.subjectIds,
       };
@@ -245,8 +253,13 @@ export default function PackagesPage() {
                         Slug: {pkg.slug}
                       </span>
                       <span className="text-xs font-medium" style={{ color: "var(--primary)" }}>
-                        ₹{pkg.price}
+                        Sale: ₹{pkg.salePrice || pkg.price}
                       </span>
+                      {pkg.mrp > 0 && (
+                        <span className="text-xs" style={{ color: "var(--muted)" }}>
+                          MRP: ₹{pkg.mrp}
+                        </span>
+                      )}
                       <span className="text-xs" style={{ color: "var(--muted)" }}>
                         {pkg.purchaseCount} purchase{pkg.purchaseCount !== 1 ? "s" : ""}
                       </span>
@@ -312,11 +325,26 @@ export default function PackagesPage() {
             />
           </div>
           <Input
-            label="Price (₹)"
+            label="MRP (₹)"
+            type="number"
+            value={form.mrp}
+            onChange={(e) => setForm((f) => ({ ...f, mrp: Number(e.target.value) }))}
+            hint="Original price before discount. Leave 0 to auto-compute."
+          />
+          <Input
+            label="Sale Price (₹)"
+            type="number"
+            value={form.salePrice}
+            onChange={(e) => setForm((f) => ({ ...f, salePrice: Number(e.target.value) }))}
+            hint="Current selling price. If 0, uses legacy price field."
+            required
+          />
+          <Input
+            label="Legacy Price (₹)"
             type="number"
             value={form.price}
             onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))}
-            required
+            hint="Kept for backward compatibility."
           />
           <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: "var(--text)" }}>
             <input

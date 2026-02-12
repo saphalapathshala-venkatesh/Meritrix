@@ -24,6 +24,8 @@ const createSchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1),
   price: z.number().int(),
+  mrp: z.number().int().optional().default(0),
+  salePrice: z.number().int().optional().default(0),
   sortOrder: z.number().int(),
 });
 
@@ -38,7 +40,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 });
     }
 
-    const subject = await prisma.subject.create({ data: parsed.data });
+    const d = parsed.data;
+    const finalSalePrice = d.salePrice || d.price;
+    const subject = await prisma.subject.create({ data: { ...d, salePrice: finalSalePrice, price: finalSalePrice } });
     return NextResponse.json(subject, { status: 201 });
   } catch (err) {
     console.error("Admin subjects POST error:", err);
@@ -52,6 +56,8 @@ const updateSchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1),
   price: z.number().int(),
+  mrp: z.number().int().optional().default(0),
+  salePrice: z.number().int().optional().default(0),
   sortOrder: z.number().int(),
 });
 
@@ -67,7 +73,8 @@ export async function PUT(req: NextRequest) {
     }
 
     const { id, ...data } = parsed.data;
-    const subject = await prisma.subject.update({ where: { id }, data });
+    const finalSalePrice = data.salePrice || data.price;
+    const subject = await prisma.subject.update({ where: { id }, data: { ...data, salePrice: finalSalePrice, price: finalSalePrice } });
     return NextResponse.json(subject);
   } catch (err) {
     console.error("Admin subjects PUT error:", err);

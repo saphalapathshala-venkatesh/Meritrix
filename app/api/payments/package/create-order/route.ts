@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Package is not available" }, { status: 400 });
     }
 
-    const amountInPaise = pkg.price * 100;
+    const finalPrice = pkg.salePrice || pkg.price;
+    const amountInPaise = finalPrice * 100;
     const receipt = `pkg_${packageId}_${userId}_${Date.now()}`;
 
     const order = await createRazorpayOrder({
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
       create: {
         userId,
         packageId,
-        amountPaid: pkg.price,
+        amountPaid: finalPrice,
         paymentStatus: "PENDING",
         paymentRef: receipt,
         gateway: "razorpay",
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
         currency: "INR",
       },
       update: {
-        amountPaid: pkg.price,
+        amountPaid: finalPrice,
         paymentStatus: "PENDING",
         paymentRef: receipt,
         gateway: "razorpay",

@@ -89,6 +89,8 @@ model Subject {
   name      String
   slug      String   @unique
   price     Int      @default(0)
+  mrp       Int      @default(0)
+  salePrice Int      @default(0)
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -187,6 +189,8 @@ model Package {
   slug        String   @unique
   description String?
   price       Int
+  mrp         Int      @default(0)
+  salePrice   Int      @default(0)
   subjectIds  String[]
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())

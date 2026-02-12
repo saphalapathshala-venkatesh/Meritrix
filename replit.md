@@ -4,6 +4,14 @@
 Meritrix is a premium learning platform MVP built with Next.js (App Router), TypeScript, Tailwind CSS, Prisma ORM, and PostgreSQL. The project has a premium UI skeleton with a design token system (Deep Teal + Lavender themes), and a production-ready database schema.
 
 ## Recent Changes
+- 2026-02-12: Dynamic Course Offerings Carousel
+  - Extended Subject and Package models with mrp (Max Retail Price) and salePrice fields
+  - GET /api/public/offerings: returns subjects + grade packs with calculated discounts
+  - CourseCard component: type badge, MRP/sale price/discount display, Buy Now button
+  - CourseCarousel component: responsive (1/2/3 cards), auto-slides every 10s, pause on hover, dot nav
+  - Homepage: replaced static pricing section with dynamic carousel fetching real offerings from DB
+  - Admin forms (content + packages) updated with MRP, Sale Price, Legacy Price fields
+  - Payment create-order routes use salePrice with fallback to legacy price field
 - 2026-02-12: Razorpay Config Hardening
   - lib/config/env.ts: centralized validated config (getRazorpayConfig, isRazorpayConfigured)
   - All backend code reads env vars through single config module only

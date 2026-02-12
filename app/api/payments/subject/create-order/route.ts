@@ -35,11 +35,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Subject not found" }, { status: 404 });
     }
 
-    if (subject.price <= 0) {
+    const finalPrice = subject.salePrice || subject.price;
+    if (finalPrice <= 0) {
       return NextResponse.json({ error: "Subject is free" }, { status: 400 });
     }
 
-    const amountInPaise = subject.price * 100;
+    const amountInPaise = finalPrice * 100;
     const receipt = `sub_${subjectId}_${userId}_${Date.now()}`;
 
     const order = await createRazorpayOrder({
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
       create: {
         userId,
         subjectId,
-        amountPaid: subject.price,
+        amountPaid: finalPrice,
         paymentStatus: "PENDING",
         paymentRef: receipt,
         gateway: "razorpay",
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
         currency: "INR",
       },
       update: {
-        amountPaid: subject.price,
+        amountPaid: finalPrice,
         paymentStatus: "PENDING",
         paymentRef: receipt,
         gateway: "razorpay",

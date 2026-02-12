@@ -5,16 +5,8 @@ import { useRouter } from "next/navigation";
 import Button from "../_components/Button";
 import PromoBanner from "../_components/PromoBanner";
 import Modal from "../_components/Modal";
+import CourseCarousel, { Offering } from "../_components/CourseCarousel";
 import { loadRazorpayScript, openRazorpayCheckout } from "../../lib/razorpay-checkout";
-
-interface PackageOption {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  price: number;
-  isActive: boolean;
-}
 
 const features = [
   {
@@ -77,82 +69,51 @@ const banners = [
   },
 ];
 
-const staticPlans = [
-  {
-    name: "Free",
-    priceLabel: "₹0",
-    features: "5 free worksheets / subject, basic progress tracking",
-    cta: "Start free",
-    type: "free" as const,
-  },
-  {
-    name: "Pro",
-    priceLabel: null,
-    features: "Unlimited worksheets, full analytics, priority support",
-    cta: "Get started",
-    type: "package" as const,
-    packageSlug: "pro",
-  },
-  {
-    name: "Team",
-    priceLabel: null,
-    features: "Everything in Pro + admin tools, bulk licenses",
-    cta: "Get started",
-    type: "package" as const,
-    packageSlug: "team",
-  },
-];
-
 export default function HomePage() {
   const router = useRouter();
-  const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
-  const [packages, setPackages] = useState<PackageOption[]>([]);
-  const [purchasing, setPurchasing] = useState(false);
+  const [offerings, setOfferings] = useState<Offering[]>([]);
+  const [offeringsLoading, setOfferingsLoading] = useState(true);
+  const [buyingId, setBuyingId] = useState<string | null>(null);
   const [resultModal, setResultModal] = useState<{ type: "success" | "error" | "info"; message: string } | null>(null);
 
   useEffect(() => {
-    fetch("/api/packages/list")
+    fetch("/api/public/offerings")
       .then((r) => (r.ok ? r.json() : []))
-      .then((data) => setPackages(Array.isArray(data) ? data : []))
-      .catch(() => {});
+      .then((data) => setOfferings(Array.isArray(data) ? data : []))
+      .catch(() => {})
+      .finally(() => setOfferingsLoading(false));
   }, []);
 
-  const findPackage = (slug: string) => packages.find((p) => p.slug === slug && p.isActive);
-
-  const handlePlanClick = async (planIndex: number) => {
-    const plan = staticPlans[planIndex];
-
-    if (plan.type === "free") {
-      router.push("/signup");
-      return;
-    }
-
-    const pkg = plan.packageSlug ? findPackage(plan.packageSlug) : null;
-    if (!pkg) {
-      setResultModal({ type: "info", message: "This plan will be available soon. Stay tuned!" });
-      return;
-    }
-
-    setPurchasing(true);
+  const handleBuy = async (offering: Offering) => {
+    setBuyingId(offering.id);
 
     try {
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
         setResultModal({ type: "error", message: "Could not load payment system. Please try again." });
-        setPurchasing(false);
+        setBuyingId(null);
         return;
       }
 
-      const res = await fetch("/api/payments/package/create-order", {
+      const isSubject = offering.type === "SUBJECT";
+      const createUrl = isSubject
+        ? "/api/payments/subject/create-order"
+        : "/api/payments/package/create-order";
+      const verifyUrl = isSubject
+        ? "/api/payments/subject/verify"
+        : "/api/payments/package/verify";
+      const bodyKey = isSubject ? "subjectId" : "packageId";
+
+      const res = await fetch(createUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packageId: pkg.id }),
+        body: JSON.stringify({ [bodyKey]: offering.id }),
       });
       const data = await res.json();
 
       if (!res.ok) {
         if (res.status === 401) {
-          router.push("/login");
+          router.push(`/login?from=${encodeURIComponent(window.location.pathname)}`);
           return;
         }
         setResultModal({
@@ -161,7 +122,7 @@ export default function HomePage() {
             ? "Payments are temporarily unavailable. Please try again later."
             : data.error || "Could not create order.",
         });
-        setPurchasing(false);
+        setBuyingId(null);
         return;
       }
 
@@ -170,17 +131,17 @@ export default function HomePage() {
         orderId: data.orderId,
         amount: data.amount,
         currency: data.currency,
-        name: data.packageName,
-        description: `Unlock ${data.packageName}`,
+        name: data.subjectName || data.packageName || offering.title,
+        description: `Unlock ${offering.title}`,
         userEmail: data.userEmail,
         userName: data.userName,
         onSuccess: async (response) => {
           try {
-            const verifyRes = await fetch("/api/payments/package/verify", {
+            const verifyRes = await fetch(verifyUrl, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                packageId: pkg.id,
+                [bodyKey]: offering.id,
                 orderId: response.razorpay_order_id,
                 paymentId: response.razorpay_payment_id,
                 signature: response.razorpay_signature,
@@ -195,23 +156,16 @@ export default function HomePage() {
           } catch {
             setResultModal({ type: "error", message: "Something went wrong verifying payment. Please contact support if charged." });
           }
-          setPurchasing(false);
+          setBuyingId(null);
         },
         onDismiss: () => {
-          setPurchasing(false);
+          setBuyingId(null);
         },
       });
     } catch {
       setResultModal({ type: "error", message: "Something went wrong. Please try again." });
-      setPurchasing(false);
+      setBuyingId(null);
     }
-  };
-
-  const getPriceLabel = (plan: typeof staticPlans[number]) => {
-    if (plan.type === "free") return plan.priceLabel;
-    const pkg = plan.packageSlug ? findPackage(plan.packageSlug) : null;
-    if (pkg) return `₹${pkg.price}`;
-    return plan.priceLabel || "—";
   };
 
   return (
@@ -311,67 +265,44 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-section" id="pricing">
+      <section className="mx-section" id="courses">
         <div className="mx-container">
           <h2
-            className="text-2xl font-semibold text-center mb-10"
+            className="text-2xl font-semibold text-center mb-2"
             style={{ color: "var(--text)" }}
           >
-            Simple, transparent pricing
+            Worksheet Courses
           </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {staticPlans.map((p, i) => (
-              <div
-                key={p.name}
-                className="rounded-xl p-6 transition-shadow cursor-pointer"
-                style={{
-                  backgroundColor: "var(--surface)",
-                  border: selectedPlan === i
-                    ? "2px solid var(--primary)"
-                    : "1px solid var(--border)",
-                  padding: selectedPlan === i ? "23px" : "24px",
-                  boxShadow: selectedPlan === i
-                    ? "0 4px 12px 0 rgb(0 0 0 / 0.08)"
-                    : "0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
-                }}
-                onClick={() => setSelectedPlan(i)}
-              >
-                <p
-                  className="text-sm font-semibold uppercase tracking-wider mb-1"
-                  style={{ color: "var(--primary)" }}
-                >
-                  {p.name}
-                </p>
-                <p
-                  className="text-3xl font-bold mb-1"
-                  style={{ color: "var(--text)" }}
-                >
-                  {getPriceLabel(p)}
-                  <span
-                    className="text-sm font-normal ml-1"
-                    style={{ color: "var(--muted)" }}
-                  >
-                    {p.type === "free" ? "" : "/mo"}
-                  </span>
-                </p>
-                <p className="text-sm mb-5" style={{ color: "var(--text-2)" }}>
-                  {p.features}
-                </p>
-                <Button
-                  className="w-full"
-                  style={{ height: "48px" }}
-                  loading={purchasing && selectedPlan === i}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedPlan(i);
-                    handlePlanClick(i);
-                  }}
-                >
-                  {p.cta}
-                </Button>
-              </div>
-            ))}
-          </div>
+          <p
+            className="text-sm text-center mb-10"
+            style={{ color: "var(--text-2)" }}
+          >
+            Choose a subject or unlock all subjects for a grade. Worksheets only.
+          </p>
+
+          {offeringsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="rounded-xl h-52 animate-pulse"
+                  style={{ backgroundColor: "var(--primary-soft)" }}
+                />
+              ))}
+            </div>
+          ) : offerings.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-sm" style={{ color: "var(--muted)" }}>
+                No worksheet courses published yet.
+              </p>
+            </div>
+          ) : (
+            <CourseCarousel
+              offerings={offerings}
+              onBuy={handleBuy}
+              buyingId={buyingId}
+            />
+          )}
         </div>
       </section>
 

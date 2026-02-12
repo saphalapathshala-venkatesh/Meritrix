@@ -1,0 +1,230 @@
+Build a premium “Worksheet Courses” carousel and replace the current “Simple, transparent pricing” section entirely.
+
+Goal
+
+Remove the existing 3 pricing cards (FREE/PRO/TEAM).
+
+Replace with a Course Cards carousel showing ONLY worksheet offerings:
+
+Subject-wise courses (single subject sale)
+
+Grade-wise packs (a package that covers all subjects in that grade)
+
+No mention of live sessions here (those will be booked via the dedicated page only).
+
+Data Model Changes (needed for MRP + Discount)
+
+Update Prisma schema to support MRP + discount for BOTH subjects and packages:
+
+In Subject model add:
+
+mrp Int @default(0)
+
+salePrice Int @default(0) // discounted/current price
+
+In Package model add:
+
+mrp Int @default(0)
+
+salePrice Int @default(0)
+
+Migration:
+
+Run migration and regenerate Prisma client.
+
+Backward compatibility rule:
+
+If salePrice is 0, treat price (existing field) as salePrice.
+
+If mrp is 0, compute a reasonable default:
+
+For Subject: mrp = max(salePrice, price) * 2 (only as a fallback; admin can edit later)
+
+For Package: same fallback.
+
+But do NOT show weird values: if mrp <= salePrice, then hide the “MRP” UI and show only salePrice.
+
+Update Admin Panel:
+
+In /admin/content subject edit/create form: add inputs for MRP and Sale Price
+
+In /admin/packages edit/create form: add inputs for MRP and Sale Price
+
+Keep existing price field for now but internally set price = salePrice when saving (so payment flows remain consistent).
+
+Data + APIs
+
+Create/Update a public API endpoint that returns a unified list of “worksheet offerings”:
+
+Path: GET /api/public/offerings
+
+Response array of objects shaped like:
+
+type Offering =
+  | {
+      type: "SUBJECT";
+      id: string;           // subjectId
+      title: string;        // Subject name
+      gradeName: string;    // Grade name
+      mrp: number;          // subject.mrp (fallback handled)
+      salePrice: number;    // subject.salePrice or subject.price
+      discountPercent: number; // computed
+      isActive: boolean;    // true if subject has any published worksheets
+    }
+  | {
+      type: "GRADE_PACK";
+      id: string;           // packageId
+      title: string;        // Package name (ex: "Grade 6 All Subjects Pack")
+      gradeName: string;    // derived from subjects inside the pack
+      mrp: number;          // package.mrp (fallback handled)
+      salePrice: number;    // package.salePrice or package.price
+      discountPercent: number; // computed
+      includesAllSubjects: true;
+      subjectCount: number;
+      isActive: boolean;
+    }
+
+
+SUBJECT offering rule:
+
+Pull from Subject joined with Grade
+
+Include only subjects that have at least 1 Worksheet with isPublished=true through chapters.
+
+GRADE_PACK offering rule:
+
+Pull from Package where isActive=true
+
+Determine gradeName by looking up subjects inside subjectIds and ensuring they all belong to one grade.
+
+If package includes all subjects of that grade (compare against subject count for that grade), mark includesAllSubjects: true.
+
+If a package spans multiple grades, exclude it for now (keep it clean).
+
+Discount calculation:
+
+discountPercent = round(((mrp - salePrice) / mrp) * 100) only if mrp > salePrice && mrp > 0
+
+If not valid, set discountPercent = 0 and hide discount UI.
+
+UI: Replace Pricing Section with Carousel
+
+Replace the entire section with a new section title:
+
+Heading: “Worksheet Courses”
+
+Subtext: “Choose a subject or unlock all subjects for a grade. Worksheets only.”
+
+Build a carousel slider component:
+
+Shows 3 cards on desktop, 2 on tablets, 1 on mobile
+
+Optionally allow 5 cards on very wide screens if spacing stays premium
+
+Auto-slide right → left every 10 seconds
+
+Smooth animation (CSS transform), no heavy libraries
+
+Pause auto-slide on hover (desktop), resume on mouse leave
+
+Include small dot indicators + left/right arrows
+
+Cards must be premium, clean, like Saphala Self Prep:
+
+Soft border, subtle shadow, rounded-xl
+
+Uses theme tokens (teal/lavender) automatically
+
+No clutter, consistent spacing
+
+Card content rules:
+
+If type === SUBJECT:
+
+Title: Subject name
+
+Subtitle: “Grade: <gradeName>”
+
+Tag: “Subject Course”
+
+If type === GRADE_PACK:
+
+Title: “Grade <gradeName> Pack” (or package title)
+
+Subtitle: “All Subjects”
+
+Tag: “Grade Pack”
+
+Meta: “Includes <subjectCount> subjects”
+
+Price block (IMPORTANT):
+
+Show Sale Price prominently: ₹<salePrice>
+
+If mrp > salePrice:
+
+Show MRP next to it as strikethrough: ₹<mrp>
+
+Show a small badge: -<discountPercent>%
+
+Keep this block aligned and consistent height across cards.
+
+CTA behavior:
+
+If logged out → redirect to /login?from=<currentPath>
+
+If logged in:
+
+SUBJECT → open Razorpay checkout for subject purchase using salePrice as final price
+
+GRADE_PACK → open Razorpay checkout for package purchase using salePrice as final price
+
+After payment success → show toast “Unlocked” and refresh access state.
+
+Theming Requirements
+
+Must match both themes:
+
+Teal theme and Lavender theme
+
+Buttons, tags, borders, card accents must use existing CSS variables (do NOT hardcode colors).
+
+Discount badge should use theme accent style (subtle, premium, not loud).
+
+Implementation Notes
+
+Do NOT break existing pages.
+
+Keep everything responsive.
+
+Keep code minimal and stable (avoid new UI libraries).
+
+Add a small loading skeleton state while offerings load.
+
+If no offerings exist, show a clean empty state: “No worksheet courses published yet.”
+
+Files likely to edit/create
+
+prisma/schema.prisma (add mrp/salePrice fields)
+
+migration + prisma generate
+
+app/api/public/offerings/route.ts (new)
+
+Home page section file where pricing is currently rendered (replace pricing section)
+
+Components: components/CourseCarousel.tsx, components/CourseCard.tsx
+
+Admin pages: /admin/content (subject form), /admin/packages (package form)
+
+Deliverables:
+
+Working course carousel in place of pricing section
+
+Auto-slide every 10 seconds
+
+Theme-consistent premium course cards
+
+Cards show Sale Price + MRP strike + Discount %
+
+No references to live sessions in this section

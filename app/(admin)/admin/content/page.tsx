@@ -11,7 +11,7 @@ import Input from "../../../_components/Input";
 type View = "grades" | "subjects" | "chapters" | "worksheets";
 
 interface Grade { id: string; name: string; sortOrder: number; }
-interface Subject { id: string; gradeId: string; name: string; slug: string; price: number; sortOrder: number; }
+interface Subject { id: string; gradeId: string; name: string; slug: string; price: number; mrp: number; salePrice: number; sortOrder: number; }
 interface Chapter { id: string; subjectId: string; name: string; slug: string; sortOrder: number; }
 interface Worksheet { id: string; chapterId: string; title: string; slug: string; tier: string; isFree: boolean; isPublished: boolean; pdfUrl?: string | null; answerUrl?: string | null; sortOrder: number; }
 
@@ -36,7 +36,7 @@ export default function ContentPage() {
   const [saving, setSaving] = useState(false);
 
   const [formGrade, setFormGrade] = useState({ name: "", sortOrder: 0 });
-  const [formSubject, setFormSubject] = useState({ name: "", slug: "", price: 0, sortOrder: 0 });
+  const [formSubject, setFormSubject] = useState({ name: "", slug: "", price: 0, mrp: 0, salePrice: 0, sortOrder: 0 });
   const [formChapter, setFormChapter] = useState({ name: "", slug: "", sortOrder: 0 });
   const [formWorksheet, setFormWorksheet] = useState({ title: "", slug: "", tier: "foundational", isFree: false, isPublished: false, pdfUrl: "", answerUrl: "", sortOrder: 0 });
   const [editId, setEditId] = useState("");
@@ -96,7 +96,7 @@ export default function ContentPage() {
     setModalMode("add");
     setEditId("");
     if (view === "grades") setFormGrade({ name: "", sortOrder: 0 });
-    else if (view === "subjects") setFormSubject({ name: "", slug: "", price: 0, sortOrder: 0 });
+    else if (view === "subjects") setFormSubject({ name: "", slug: "", price: 0, mrp: 0, salePrice: 0, sortOrder: 0 });
     else if (view === "chapters") setFormChapter({ name: "", slug: "", sortOrder: 0 });
     else setFormWorksheet({ title: "", slug: "", tier: "foundational", isFree: false, isPublished: false, pdfUrl: "", answerUrl: "", sortOrder: 0 });
     setModalOpen(true);
@@ -109,7 +109,7 @@ export default function ContentPage() {
   };
   const openEditSubject = (s: Subject) => {
     setModalMode("edit"); setEditId(s.id);
-    setFormSubject({ name: s.name, slug: s.slug, price: s.price, sortOrder: s.sortOrder });
+    setFormSubject({ name: s.name, slug: s.slug, price: s.price, mrp: s.mrp || 0, salePrice: s.salePrice || s.price, sortOrder: s.sortOrder });
     setModalOpen(true);
   };
   const openEditChapter = (c: Chapter) => {
@@ -141,7 +141,7 @@ export default function ContentPage() {
         if (modalMode === "edit") body.id = editId;
       } else if (view === "subjects") {
         url = "/api/admin/subjects";
-        body = { ...formSubject, price: Number(formSubject.price), sortOrder: Number(formSubject.sortOrder), gradeId: selectedGrade!.id };
+        body = { ...formSubject, price: Number(formSubject.price), mrp: Number(formSubject.mrp), salePrice: Number(formSubject.salePrice), sortOrder: Number(formSubject.sortOrder), gradeId: selectedGrade!.id };
         if (modalMode === "edit") body.id = editId;
       } else if (view === "chapters") {
         url = "/api/admin/chapters";
@@ -292,7 +292,8 @@ export default function ContentPage() {
                     <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>{s.name}</p>
                     <div className="flex items-center gap-3 mt-1">
                       <span className="text-xs" style={{ color: "var(--muted)" }}>Slug: {s.slug}</span>
-                      <span className="text-xs" style={{ color: "var(--muted)" }}>Price: ₹{s.price}</span>
+                      <span className="text-xs" style={{ color: "var(--muted)" }}>Sale: ₹{s.salePrice || s.price}</span>
+                      {s.mrp > 0 && <span className="text-xs" style={{ color: "var(--muted)" }}>MRP: ₹{s.mrp}</span>}
                       <span className="text-xs" style={{ color: "var(--muted)" }}>Sort: {s.sortOrder}</span>
                     </div>
                   </div>
@@ -367,7 +368,9 @@ export default function ContentPage() {
             <>
               <Input label="Name" value={formSubject.name} onChange={e => setFormSubject(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Mathematics" />
               <Input label="Slug" value={formSubject.slug} onChange={e => setFormSubject(f => ({ ...f, slug: e.target.value }))} placeholder="e.g. mathematics" />
-              <Input label="Price (₹)" type="number" value={formSubject.price} onChange={e => setFormSubject(f => ({ ...f, price: Number(e.target.value) }))} />
+              <Input label="MRP (₹)" type="number" value={formSubject.mrp} onChange={e => setFormSubject(f => ({ ...f, mrp: Number(e.target.value) }))} hint="Original price before discount. Leave 0 to auto-compute." />
+              <Input label="Sale Price (₹)" type="number" value={formSubject.salePrice} onChange={e => setFormSubject(f => ({ ...f, salePrice: Number(e.target.value) }))} hint="Current selling price. If 0, uses legacy price field." />
+              <Input label="Legacy Price (₹)" type="number" value={formSubject.price} onChange={e => setFormSubject(f => ({ ...f, price: Number(e.target.value) }))} hint="Kept for backward compatibility." />
               <Input label="Sort Order" type="number" value={formSubject.sortOrder} onChange={e => setFormSubject(f => ({ ...f, sortOrder: Number(e.target.value) }))} />
             </>
           )}
