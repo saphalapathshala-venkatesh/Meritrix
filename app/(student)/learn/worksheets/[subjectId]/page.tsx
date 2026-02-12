@@ -32,13 +32,36 @@ interface SubjectInfo {
   hasPurchased: boolean;
 }
 
-const TIER_LABELS: Record<string, string> = {
-  foundational: "Foundational",
-  "skill-builder": "Skill Builder",
-  mastery: "Mastery",
-};
+const TIER_ORDER = ["foundational", "skill_builder", "mastery"];
 
-const TIER_ORDER = ["foundational", "skill-builder", "mastery"];
+const TIER_CONFIG: Record<string, { label: string; icon: React.ReactNode }> = {
+  foundational: {
+    label: "Foundational",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 12.5h12M4 9.5h8M3 6.5l5-4 5 4" />
+        <rect x="6" y="9.5" width="4" height="3" />
+      </svg>
+    ),
+  },
+  skill_builder: {
+    label: "Skill Builder",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8 12V4M8 4l3.5 3.5M8 4L4.5 7.5" />
+        <path d="M3 14h10" />
+      </svg>
+    ),
+  },
+  mastery: {
+    label: "Mastery",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8 1.5l1.85 3.75 4.15.6-3 2.93.71 4.12L8 10.97 4.29 12.9 5 8.78 2 5.85l4.15-.6z" />
+      </svg>
+    ),
+  },
+};
 
 export default function SubjectDetailPage() {
   const { subjectId } = useParams<{ subjectId: string }>();
@@ -163,27 +186,36 @@ export default function SubjectDetailPage() {
             return (
               <Card key={ch.id}>
                 <h2
-                  className="text-base font-semibold mb-4"
-                  style={{ color: "var(--text)" }}
+                  className="text-base font-semibold pb-3 mb-1"
+                  style={{ color: "var(--text)", borderBottom: "1px solid var(--border)" }}
                 >
                   {ch.name}
                 </h2>
 
-                {TIER_ORDER.map((tier) => {
+                {TIER_ORDER.map((tier, tierIdx) => {
                   const items = grouped[tier];
                   if (!items || items.length === 0) return null;
+                  const config = TIER_CONFIG[tier];
+                  const visibleTiers = TIER_ORDER.filter((t) => (grouped[t]?.length || 0) > 0);
+                  const isLast = tier === visibleTiers[visibleTiers.length - 1];
+
                   return (
-                    <div key={tier} className="mb-4 last:mb-0">
-                      <p
-                        className="text-xs font-semibold uppercase tracking-wider mb-2 pb-1"
-                        style={{
-                          color: "var(--muted)",
-                          borderBottom: "1px solid var(--border)",
-                        }}
+                    <div key={tier} className={isLast ? "" : "mb-3"} style={{ marginTop: tierIdx === 0 ? "12px" : undefined }}>
+                      <div
+                        className="flex items-center justify-between pb-2 mb-1"
+                        style={{ borderBottom: "1px solid rgba(226, 232, 240, 0.5)" }}
                       >
-                        {TIER_LABELS[tier] || tier}
-                      </p>
-                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2" style={{ color: "var(--text-2)" }}>
+                          <span className="flex-shrink-0 opacity-60">{config?.icon}</span>
+                          <span className="text-xs font-semibold uppercase tracking-wider">
+                            {config?.label || tier}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-medium" style={{ color: "var(--muted)" }}>
+                          {items.length}
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
                         {items.map((ws) => (
                           <WorksheetRow
                             key={ws.id}
@@ -237,7 +269,7 @@ function WorksheetRow({
 }) {
   return (
     <div
-      className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
+      className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
       style={{
         backgroundColor: ws.isCompleted ? "var(--primary-soft)" : "transparent",
       }}
@@ -245,7 +277,7 @@ function WorksheetRow({
       <button
         onClick={onToggle}
         disabled={ws.isLocked}
-        className="flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+        className="flex-shrink-0 w-[18px] h-[18px] rounded border-[1.5px] flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         style={{
           borderColor: ws.isCompleted ? "var(--primary)" : "var(--border)",
           backgroundColor: ws.isCompleted ? "var(--primary)" : "transparent",
@@ -253,14 +285,14 @@ function WorksheetRow({
         aria-label={ws.isCompleted ? "Mark incomplete" : "Mark completed"}
       >
         {ws.isCompleted && (
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
             <path d="M2.5 6l2.5 2.5 4.5-5" stroke="var(--on-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </button>
 
       <span
-        className="flex-1 text-sm"
+        className="flex-1 text-sm min-w-0"
         style={{
           color: ws.isCompleted ? "var(--primary)" : "var(--text)",
           textDecoration: ws.isCompleted ? "line-through" : "none",
@@ -271,14 +303,14 @@ function WorksheetRow({
 
       {ws.isFree ? (
         <span
-          className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full"
+          className="flex-shrink-0 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full"
           style={{ backgroundColor: "#DEF7EC", color: "#03543F" }}
         >
           Free
         </span>
       ) : ws.isLocked ? (
         <span
-          className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full"
+          className="flex-shrink-0 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full"
           style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
         >
           Locked
@@ -290,7 +322,7 @@ function WorksheetRow({
           href={ws.pdfUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs font-medium px-2.5 py-1 rounded-md transition-colors"
+          className="flex-shrink-0 text-xs font-medium px-2.5 py-1 rounded-md transition-colors"
           style={{
             backgroundColor: "var(--primary-soft)",
             color: "var(--primary)",

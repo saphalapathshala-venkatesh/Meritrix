@@ -1,0 +1,99 @@
+Upgrade the student subject worksheets page UI (/learn/worksheets/[subjectId]) to a premium tiered layout.
+
+DO NOT change Prisma schema.
+DO NOT change business logic.
+DO NOT modify access logic.
+Only improve grouping + presentation.
+
+GOAL:
+Inside each chapter card, worksheets must be clearly divided into 3 premium tier sections:
+1) Foundational
+2) Skill Builder
+3) Mastery
+
+Each tier section must include:
+- Tier title
+- Small subtle icon (minimal, monochrome)
+- Worksheet count (e.g., Foundational (3))
+- Thin divider line separating tiers
+- Clean worksheet rows
+- No excessive spacing
+- No loud colors
+
+IMPLEMENTATION DETAILS:
+
+1) Group worksheets by tier in this strict order:
+   foundational → skill_builder → mastery
+
+2) Mapping for display:
+   foundational -> "Foundational"
+   skill_builder -> "Skill Builder"
+   mastery -> "Mastery"
+
+3) Add a small inline SVG icon per tier:
+   - Foundational: simple book icon
+   - Skill Builder: upward arrow or tool icon
+   - Mastery: star or crown icon
+Icons must be subtle and use current text color (no bright colors).
+
+4) Tier header layout:
+   - Flex row
+   - Icon (16px)
+   - Title
+   - Count in muted color
+   - Space-between alignment
+   - Very thin divider below (border-t with opacity 10–15%)
+
+Example visual structure:
+
+-----------------------------------
+Chapter Name
+-----------------------------------
+
+[Icon] Foundational (3)
+-----------------------------------
+Worksheet row
+Worksheet row
+Worksheet row
+
+[Icon] Skill Builder (2)
+-----------------------------------
+Worksheet row
+Worksheet row
+
+[Icon] Mastery (1)
+-----------------------------------
+Worksheet row
+
+5) Hide any tier section that has zero worksheets.
+
+6) Spacing rules:
+   - No large empty vertical gaps.
+   - Consistent padding across tiers.
+   - Keep chapter card compact but readable.
+   - Ensure text wrapping does not break layout.
+
+7) Ensure seed data uses exactly:
+   foundational
+   skill_builder
+   mastery
+
+If seed currently uses other variants, normalize them.
+
+8) Maintain current worksheet row behavior:
+   - FREE badge
+   - LOCKED state
+   - Completion checkbox
+   - Download/View button
+
+9) Keep UI premium:
+   - No gradient backgrounds
+   - No heavy borders
+   - No shadow overload
+   - Use subtle separators only
+
+OUTPUT:
+- Updated JSX for chapter card
+- Confirm tiers render in correct order
+- Confirm worksheet counts appear correctly
+- Confirm layout has no overflow or alignment issues

@@ -61,7 +61,7 @@ async function main() {
           },
         });
 
-        const tiers = ["foundational", "skill-builder", "mastery"] as const;
+        const tiers = ["foundational", "skill_builder", "mastery"] as const;
         for (const tier of tiers) {
           for (let i = 1; i <= 2; i++) {
             const wsSlug = `${ch.slug}-${tier}-${i}`;
@@ -71,7 +71,7 @@ async function main() {
               update: {},
               create: {
                 chapterId: chapter.id,
-                title: `${ch.name} ${tier.charAt(0).toUpperCase() + tier.slice(1).replace("-", " ")} Worksheet ${i}`,
+                title: `${ch.name} ${tier.split("_").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")} Worksheet ${i}`,
                 slug: wsSlug,
                 description: `Practice worksheet for ${subj.name} ${ch.name}`,
                 tier,
