@@ -124,6 +124,7 @@ model Worksheet {
   slug        String   @unique
   description String?
   tier        String   @default("foundational")
+  isFree      Boolean  @default(false)
   pdfUrl      String?
   answerUrl   String?
   sortOrder   Int      @default(0)

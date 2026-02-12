@@ -1,0 +1,40 @@
+Implement the Worksheets browsing MVP using the CURRENT Prisma schema (do NOT assume model names — inspect prisma/schema.prisma first).
+
+GOAL UX:
+- Student selects Grade (only current grade + immediate next grade).
+- Then selects Subject.
+- Then sees Chapters as cards.
+- Inside each chapter card, show three sections:
+  Foundational / Skill Builder / Mastery
+- Each worksheet is a row with:
+  title, free/locked badge, download/view button, checkbox “Completed”
+- Free/locked logic:
+  - Worksheet marked free is always accessible.
+  - Otherwise locked unless the student purchased the subject or an included package.
+- Completed checkbox:
+  - On click -> show polite honesty dialog -> confirm -> mark completed.
+- Dashboard:
+  - Show per-subject completion counts and % progress bar
+  - Auto-updates when new worksheets are added (compute totals live).
+
+IMPLEMENTATION STEPS:
+1) Identify models/relations in schema for:
+   Grade, Subject, Chapter, Worksheet
+   Completion tracking (WorksheetProgress/Completion)
+   Purchases (Subject purchase + Package purchase)
+2) Create protected pages under student route group:
+   - /app/(student)/learn/worksheets/page.tsx (grade + subject selector)
+   - /app/(student)/learn/worksheets/[subjectId]/page.tsx (chapter cards + worksheet lists)
+   - /app/(student)/dashboard/page.tsx (progress summary)
+3) Create API routes:
+   - GET /api/worksheets/grades (returns allowed grades for user: current + next)
+   - GET /api/worksheets/subjects?gradeId=...
+   - GET /api/worksheets/subject/[subjectId] (chapters + worksheets + free/locked + completion status)
+   - POST /api/worksheets/progress (toggle completed with confirmation)
+4) Use the server-side requireUser() guard to protect these routes/pages.
+5) Keep UI premium but minimal; reuse existing Card/Button/ProgressBar/Modal components.
+
+Output:
+- List of created files
+- Confirm which Prisma models were used (actual names from schema)
+- Confirm free/locked and completion logic works.
