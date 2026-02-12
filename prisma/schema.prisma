@@ -31,6 +31,10 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum PassType {
+  VEDIC_MATHS
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -50,6 +54,7 @@ model User {
   drillAttempts         DrillAttempt[]
   liveBookings          LiveBooking[]
   couponUsages          CouponUsage[]
+  sessionPasses         SessionPass[]
 
   @@index([email])
   @@map("users")
@@ -265,6 +270,7 @@ model LiveSession {
   title        String
   description  String?
   sessionType  SessionType @default(ONE_ON_ONE)
+  category     String      @default("general")
   maxStudents  Int         @default(1)
   pricePerSlot Int
   scheduledAt  DateTime
@@ -288,11 +294,13 @@ model LiveBooking {
   paymentStatus PaymentStatus @default(PENDING)
   paymentRef    String?
   couponId      String?
+  passId        String?
   bookedAt      DateTime      @default(now())
 
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  liveSession LiveSession @relation(fields: [liveSessionId], references: [id], onDelete: Cascade)
-  coupon      Coupon?     @relation(fields: [couponId], references: [id])
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  liveSession LiveSession  @relation(fields: [liveSessionId], references: [id], onDelete: Cascade)
+  coupon      Coupon?      @relation(fields: [couponId], references: [id])
+  sessionPass SessionPass? @relation(fields: [passId], references: [id])
 
   @@unique([userId, liveSessionId])
   @@index([userId])
@@ -331,4 +339,54 @@ model CouponUsage {
   @@unique([userId, couponId])
   @@index([userId])
   @@map("coupon_usages")
+}
+
+model PassProduct {
+  id           String   @id @default(cuid())
+  passType     PassType @unique
+  title        String   @default("Senior Vedic Maths Live Pass")
+  subtitle     String?  @default("Grades 6–12 • 30-min sessions • Small groups & 1:1")
+  totalCredits Int
+  durationMins Int      @default(30)
+  currency     String   @default("CAD")
+  mrpCents     Int
+  priceCents   Int
+  isActive     Boolean  @default(true)
+  termsVersion String   @default("v1")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessionPasses SessionPass[]
+
+  @@map("pass_products")
+}
+
+model SessionPass {
+  id              String        @id @default(cuid())
+  userId          String
+  passType        PassType
+  productId       String
+  totalCredits    Int
+  usedCredits     Int           @default(0)
+  expiresAt       DateTime?
+  currency        String
+  mrpCents        Int
+  priceCents      Int
+  paymentStatus   PaymentStatus @default(PENDING)
+  gateway         String        @default("razorpay")
+  orderId         String?       @unique
+  paymentId       String?
+  signature       String?
+  termsVersion    String
+  termsAcceptedAt DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product  PassProduct @relation(fields: [productId], references: [id])
+  bookings LiveBooking[]
+
+  @@index([userId])
+  @@index([productId])
+  @@map("session_passes")
 }

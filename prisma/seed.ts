@@ -118,6 +118,46 @@ async function main() {
     });
   }
 
+  await prisma.grade.upsert({
+    where: { name: "Vedic Maths (Senior)" },
+    update: {},
+    create: { name: "Vedic Maths (Senior)", sortOrder: 13 },
+  });
+
+  const vedicGrade = await prisma.grade.findUnique({ where: { name: "Vedic Maths (Senior)" } });
+  if (vedicGrade) {
+    await prisma.subject.upsert({
+      where: { slug: "vedic-maths" },
+      update: {},
+      create: {
+        gradeId: vedicGrade.id,
+        name: "Vedic Maths",
+        slug: "vedic-maths",
+        price: 0,
+        mrp: 0,
+        salePrice: 0,
+        sortOrder: 0,
+      },
+    });
+  }
+
+  await prisma.passProduct.upsert({
+    where: { passType: "VEDIC_MATHS" },
+    update: {},
+    create: {
+      passType: "VEDIC_MATHS",
+      title: "Senior Vedic Maths Live Pass",
+      subtitle: "Grades 6\u201312 \u2022 30-min sessions \u2022 Small groups & 1:1",
+      totalCredits: 8,
+      durationMins: 30,
+      currency: "CAD",
+      mrpCents: 19900,
+      priceCents: 14900,
+      isActive: true,
+      termsVersion: "v1",
+    },
+  });
+
   console.log("Seed complete.");
 }
 

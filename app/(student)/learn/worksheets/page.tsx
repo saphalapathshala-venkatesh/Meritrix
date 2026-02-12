@@ -92,11 +92,30 @@ export default function WorksheetsPage() {
           <p className="text-sm" style={{ color: "var(--muted)" }}>Loading subjects...</p>
         </div>
       ) : subjects.length === 0 ? (
-        <Card>
-          <p className="text-sm text-center py-4" style={{ color: "var(--muted)" }}>
-            No subjects found for this grade.
+        <div className="text-center py-16">
+          <div
+            className="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-4"
+            style={{ backgroundColor: "var(--primary-soft)" }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="3" />
+              <path d="M8 10h8M8 14h5" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold mb-2" style={{ color: "var(--text)" }}>
+            Content coming soon
+          </h3>
+          <p className="text-sm max-w-sm mx-auto mb-6" style={{ color: "var(--text-2)" }}>
+            We're currently building Grades 6–10 first. Grades 11–12 next, then lower grades.
           </p>
-        </Card>
+          <Link
+            href="/learn/worksheets"
+            className="inline-flex items-center gap-1 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            style={{ backgroundColor: "var(--primary-soft)", color: "var(--primary)" }}
+          >
+            Back to Worksheets
+          </Link>
+        </div>
       ) : (
         <>
           <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--muted)" }}>

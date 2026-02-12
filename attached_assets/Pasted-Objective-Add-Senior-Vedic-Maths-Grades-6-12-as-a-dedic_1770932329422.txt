@@ -1,0 +1,350 @@
+Objective: Add “Senior Vedic Maths (Grades 6–12)” as a dedicated course treated like a Grade, implement a Vedic Live Pass Product where Admin controls total sessions (credits), MRP, price, currency, add mandatory Terms & Cancellation/Reschedule policy acceptance before purchase, add clean “Content coming soon” handling for empty grades/subjects — without breaking existing worksheets/auth/admin/Razorpay flows.
+
+A) Vedic Maths as a Grade + Subject (no special-case logic)
+
+Create a Grade:
+
+Name: “Vedic Maths (Senior)”
+
+sortOrder: after Grade 12
+
+Create a Subject under it:
+
+Name: “Vedic Maths”
+
+slug: vedic-maths
+
+price: keep 0 or nominal (this is for worksheets side only; live pass is separate)
+
+Ensure it appears:
+
+Worksheets browse (grades list)
+
+Admin content drill-down (Grades → Subjects → Chapters → Worksheets)
+
+No forced chapters/worksheets required now.
+
+B) “Content coming soon” UX (no empty/blank pages)
+
+Update both:
+
+/learn/worksheets (grade → subjects list)
+
+/learn/worksheets/[subjectId] (subject → chapters/worksheets)
+
+Rules:
+
+If a grade has 0 subjects, show a premium empty state:
+
+Title: Content coming soon
+
+Body: “We’re currently building Grades 6–10 first. Grades 11–12 next, then lower grades.”
+
+Button: “Back to Worksheets”
+
+If a subject has 0 published worksheets, show the same empty state.
+
+No broken layouts, no empty cards.
+
+C) Vedic Live Pass (Admin decides sessions count, price, and currency)
+C1) Database (safe + clean)
+
+Add enums:
+
+enum PassType { VEDIC_MATHS }
+
+Add model: PassProduct (Admin-configurable product)
+
+id String @id @default(cuid())
+
+passType PassType @unique // only one Vedic product initially
+
+title String default: “Senior Vedic Maths Live Pass”
+
+subtitle String? default: “Grades 6–12 • 30-min sessions • Small groups & 1:1”
+
+totalCredits Int // ADMIN controls sessions count
+
+durationMins Int @default(30) // Vedic sessions are 30 mins
+
+currency String @default("CAD")
+
+mrpCents Int
+
+priceCents Int
+
+isActive Boolean @default(true)
+
+termsVersion String @default("v1")
+
+createdAt DateTime @default(now())
+
+updatedAt DateTime @updatedAt
+
+Add model: SessionPass (User purchase instance)
+
+id String @id @default(cuid())
+
+userId String
+
+passType PassType
+
+productId String (FK to PassProduct)
+
+totalCredits Int
+
+usedCredits Int @default(0)
+
+expiresAt DateTime?
+
+currency String
+
+mrpCents Int
+
+priceCents Int
+
+paymentStatus PaymentStatus @default(PENDING)
+
+Razorpay fields:
+
+gateway String @default("razorpay")
+
+orderId String?
+
+paymentId String?
+
+signature String?
+
+Terms capture:
+
+termsVersion String
+
+termsAcceptedAt DateTime?
+
+timestamps
+
+Relations:
+
+SessionPass.user -> User
+
+SessionPass.product -> PassProduct
+
+Update LiveSession:
+
+Add:
+
+category String @default("general") // “vedic”
+
+Keep durationMins, but for Vedic sessions admin defaults to 30 in UI
+
+Update LiveBooking:
+
+Add:
+
+passId String?
+
+relation to SessionPass?
+
+Run migration + regenerate Prisma client.
+
+C2) Admin UI (must-have for Option C)
+
+In Admin panel add a new page:
+
+/admin/passes
+Features:
+
+Manage the Vedic Live Pass Product (single product for now):
+
+totalCredits (sessions count)
+
+MRP (CAD)
+
+price (CAD)
+
+active/inactive
+
+title/subtitle
+
+termsVersion (default v1)
+
+Pre-seed one Vedic product if none exists.
+
+In Admin Live Sessions creation:
+
+Add Category dropdown: General / Vedic Maths
+
+If Vedic Maths selected:
+
+default duration 30 mins
+
+allow ONE_ON_ONE or BATCH
+
+allow maxStudents configurable (small groups)
+
+C3) Student Vedic Maths page (clear + no confusion)
+
+Create public+student-friendly page:
+
+/vedic-maths
+
+Sections:
+
+Hero:
+
+Title: Senior Vedic Maths (Grades 6–12)
+
+Subtitle: “Short 30-minute sessions • Small groups & 1:1 • Multiple sessions after one-time pass purchase”
+
+Pass card (premium):
+
+Shows:
+
+MRP (struck)
+
+Price (bold)
+
+“XX% OFF” badge
+
+“Includes {totalCredits} sessions”
+
+“Each session: 30 minutes”
+
+Button: “Buy Live Pass”
+
+Policy cards (transparent communication):
+
+Card A: Cancellation policy (simple bullets)
+
+Card B: Reschedule policy (simple bullets)
+
+Mandatory acceptance:
+
+Checkbox: “I agree to Terms & Cancellation/Reschedule Policy”
+
+Link “Terms & Conditions” opens modal with full text
+
+Buy button disabled until checked
+
+After purchase:
+
+Show “Credits left: X / total”
+
+Show upcoming Vedic sessions list:
+
+each has “Book using pass”
+
+Booking consumes 1 credit.
+
+C4) API routes (safe + gateway-agnostic style)
+
+Create:
+
+GET /api/passes/vedic/product
+returns active PassProduct config (no secrets)
+
+POST /api/passes/vedic/create-order
+
+requires auth
+
+fetch active PassProduct
+
+validate checkbox acceptance (termsAccepted true)
+
+create SessionPass row using product values:
+
+totalCredits copied from product
+
+mrp/price/currency copied
+
+termsAcceptedAt stored
+
+paymentStatus PENDING
+
+create Razorpay order for priceCents
+
+store orderId
+
+return order details + passId
+
+POST /api/passes/vedic/verify
+
+verifies Razorpay signature
+
+marks SessionPass SUCCESS
+
+stores paymentId/signature
+
+returns success
+
+Vedic session + booking:
+
+GET /api/vedic/sessions (list upcoming category="vedic")
+
+POST /api/vedic/book
+
+requires auth
+
+requires SUCCESS SessionPass with remaining credits
+
+transaction:
+
+increment usedCredits
+
+create LiveBooking with passId and liveSessionId
+
+returns booking
+
+Webhook:
+
+Keep existing webhook handler; if you already have /api/webhooks/razorpay, extend it to support pass payments idempotently (optional now). Do not break current subject/package webhook logic.
+
+C5) Non-breaking guarantees
+
+Vedic pass flows must NOT modify:
+
+existing subject purchase flow
+
+existing package purchase flow
+
+worksheets browsing logic
+
+Everything should be isolated under:
+
+/vedic-maths
+
+/admin/passes
+
+/api/passes/*
+
+/api/vedic/*
+
+D) Copy rules (no confusion)
+
+Everywhere: use exact phrasing
+
+Senior Vedic Maths (Grades 6–12)
+
+Deliverables checklist
+
+Vedic Maths grade+subject appears in worksheets/admin
+
+Empty grades/subjects show “Content coming soon”
+
+Admin can configure:
+
+total sessions (credits)
+
+MRP/price (CAD)
+
+active toggle
+
+Students can:
+
+accept policies + terms
+
+buy pass via Razorpay
+
+book multiple 30-min Vedic sessions using credits
+
+No regressions
