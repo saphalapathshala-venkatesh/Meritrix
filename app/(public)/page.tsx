@@ -8,7 +8,7 @@ const features = [
   {
     title: "Worksheets",
     description:
-      "Structured, curriculum-aligned practice sheets with instant grading and detailed explanations.",
+      "Structured practice sheets aligned to your curriculum, with instant grading and detailed explanations.",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.5" />
@@ -147,8 +147,8 @@ export default function HomePage() {
                     {f.title}
                   </h3>
                   <p
-                    className="text-sm break-words min-h-[72px]"
-                    style={{ color: "var(--text-2)", lineHeight: "1.65", hyphens: "auto" }}
+                    className="text-sm min-h-[72px]"
+                    style={{ color: "var(--text-2)", lineHeight: "1.65", hyphens: "none" }}
                   >
                     {f.description}
                   </p>
