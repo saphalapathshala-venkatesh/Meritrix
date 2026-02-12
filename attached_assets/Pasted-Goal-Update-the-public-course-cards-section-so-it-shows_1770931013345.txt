@@ -1,0 +1,110 @@
+Goal: Update the public “course cards” section so it shows both:
+
+Subject course cards (existing)
+
+Grade package cards (new demo) — “All subjects included combo”
+
+Instructions:
+
+Locate the section/page where the current subject demo cards are rendered (the same section shown in the screenshot).
+
+Do NOT change navbar, banners, auth, or payments.
+
+Only change this course card section.
+
+Create a unified data model for cards:
+
+Each card is either:
+
+type: "SUBJECT" or
+
+type: "GRADE_PACKAGE"
+
+For SUBJECT cards, keep existing fields: subjectName, gradeName, mrp, price, currency="$".
+
+For GRADE_PACKAGE cards, add fields:
+
+gradeName (ex: "Grade 6")
+
+includesLabel (always: "All Subjects Included")
+
+mrp, price, currency="$"
+
+subjectCount (optional, if available; otherwise omit)
+
+Render two kinds of card headers:
+
+SUBJECT: badge “SUBJECT COURSE”
+
+GRADE_PACKAGE: badge “GRADE PACKAGE”
+Use the same badge styling.
+
+Card body layout (keep current clean design):
+
+Title:
+
+SUBJECT: show subjectName (ex: “Mathematics”)
+
+GRADE_PACKAGE: show gradeName (ex: “Grade 6 Combo” or just “Grade 6”)
+
+Subtitle line:
+
+SUBJECT: “Grade: Grade 6”
+
+GRADE_PACKAGE: “All Subjects Included”
+
+Pricing row:
+
+Show MRP label, strike-through MRP value
+
+Show discount pill like “38% OFF”
+
+Show big discounted price below (same as now)
+
+CTA:
+
+Button text:
+
+SUBJECT: “Buy Now”
+
+GRADE_PACKAGE: “Buy Grade Pack”
+
+Keep button styling identical
+
+Add demo grade package cards (at least 2) alongside existing subject cards:
+
+Example demo data:
+
+Grade 6 package: MRP $149.00, Price $99.00
+
+Grade 7 package: MRP $159.00, Price $109.00
+
+Make sure the discount % is computed from MRP and Price:
+
+discountPct = round(((mrp - price) / mrp) * 100)
+
+Format money with two decimals (e.g., $99.00)
+
+Ensure the section remains premium:
+
+Same spacing/padding as current subject cards
+
+No new background colors
+
+No extra text blocks
+
+No layout shifts across themes
+
+Do NOT connect grade package cards to payment yet.
+
+On click, just show a calm toast or modal:
+
+“Grade packs purchase flow will be enabled next.”
+
+Keep this consistent with the site’s design.
+
+After implementation:
+
+Confirm visually that both card types render cleanly.
+
+Share the final screenshot output from the updated section.

@@ -88,6 +88,36 @@ async function main() {
     }
   }
 
+  const allSubjects = await prisma.subject.findMany({
+    include: { grade: true },
+  });
+
+  const gradePackages = [
+    { gradeName: "Grade 6", slug: "grade-6-combo", mrp: 149, salePrice: 99 },
+    { gradeName: "Grade 7", slug: "grade-7-combo", mrp: 159, salePrice: 109 },
+    { gradeName: "Grade 8", slug: "grade-8-combo", mrp: 169, salePrice: 119 },
+  ];
+
+  for (const gp of gradePackages) {
+    const gradeSubjects = allSubjects.filter((s) => s.grade.name === gp.gradeName);
+    const subjectIds = gradeSubjects.map((s) => s.id);
+    if (subjectIds.length === 0) continue;
+
+    await prisma.package.upsert({
+      where: { slug: gp.slug },
+      update: { mrp: gp.mrp, salePrice: gp.salePrice, price: gp.salePrice, subjectIds },
+      create: {
+        name: `${gp.gradeName} Combo`,
+        slug: gp.slug,
+        price: gp.salePrice,
+        mrp: gp.mrp,
+        salePrice: gp.salePrice,
+        subjectIds,
+        isActive: true,
+      },
+    });
+  }
+
   console.log("Seed complete.");
 }
 

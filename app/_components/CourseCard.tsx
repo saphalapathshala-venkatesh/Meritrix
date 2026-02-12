@@ -23,8 +23,10 @@ export default function CourseCard({
   onBuy,
   buying,
 }: CourseCardProps) {
-  const tag = type === "SUBJECT" ? "Subject Course" : "Grade Pack";
+  const isSubject = type === "SUBJECT";
+  const tag = isSubject ? "Subject Course" : "Grade Package";
   const noPrice = !salePrice || salePrice <= 0;
+  const ctaText = isSubject ? "Buy Now" : "Buy Grade Pack";
 
   return (
     <div
@@ -39,8 +41,8 @@ export default function CourseCard({
         <span
           className="self-start text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3"
           style={{
-            backgroundColor: type === "SUBJECT" ? "var(--primary-soft)" : "rgba(139, 92, 246, 0.1)",
-            color: type === "SUBJECT" ? "var(--primary)" : "#7C3AED",
+            backgroundColor: isSubject ? "var(--primary-soft)" : "rgba(139, 92, 246, 0.1)",
+            color: isSubject ? "var(--primary)" : "#7C3AED",
           }}
         >
           {tag}
@@ -54,10 +56,10 @@ export default function CourseCard({
         </h3>
 
         <p className="text-xs mb-1" style={{ color: "var(--text-2)" }}>
-          {type === "SUBJECT" ? `Grade: ${gradeName}` : "All Subjects"}
+          {isSubject ? `Grade: ${gradeName}` : "All Subjects Included"}
         </p>
 
-        {type === "GRADE_PACK" && subjectCount && (
+        {!isSubject && subjectCount && subjectCount > 0 && (
           <p className="text-xs" style={{ color: "var(--muted)" }}>
             Includes {subjectCount} subjects
           </p>
@@ -84,7 +86,7 @@ export default function CourseCard({
             color: "var(--on-primary)",
           }}
         >
-          {buying ? "Processing…" : noPrice ? "Contact Us" : "Buy Now"}
+          {buying ? "Processing…" : noPrice ? "Contact Us" : ctaText}
         </button>
       </div>
     </div>

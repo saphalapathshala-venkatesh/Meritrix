@@ -85,6 +85,14 @@ export default function HomePage() {
   }, []);
 
   const handleBuy = async (offering: Offering) => {
+    if (offering.type === "GRADE_PACK") {
+      setResultModal({
+        type: "info",
+        message: "Grade packs purchase flow will be enabled next.",
+      });
+      return;
+    }
+
     setBuyingId(offering.id);
 
     try {
