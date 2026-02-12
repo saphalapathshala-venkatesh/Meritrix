@@ -1,0 +1,267 @@
+Build Razorpay payments for Meritrix (Next.js App Router + Prisma). Follow these rules strictly:
+
+Goal (MVP Payment Layer)
+
+Implement Razorpay integration for:
+
+Subject purchase
+
+Package purchase
+
+Must support:
+
+Creating an order (server-side)
+
+Opening Razorpay Checkout (client-side)
+
+Verifying payment signature (server-side)
+
+Marking purchase SUCCESS/FAILED in DB
+
+Unlocking content immediately after SUCCESS
+
+Webhook support (optional but recommended) to finalize payment even if client closes browser
+
+Non-negotiable engineering rules
+
+No client secrets exposed
+
+All verification server-side
+
+Never trust client “success” alone
+
+Use env vars for Razorpay keys
+
+Keep logic gateway-agnostic (Stripe swap later)
+
+1) Install dependencies
+
+Add:
+
+razorpay
+
+crypto (Node built-in, don’t install)
+
+optionally zod if needed (already present likely)
+
+2) Environment Variables
+
+Add to .env (or Replit Secrets):
+
+RAZORPAY_KEY_ID=...
+
+RAZORPAY_KEY_SECRET=...
+
+RAZORPAY_WEBHOOK_SECRET=... (only if webhook enabled)
+
+APP_BASE_URL=... (used for return URLs/logging)
+
+Never print secrets in logs.
+
+3) Database adjustments (Prisma)
+
+Your schema already has:
+
+SubjectPurchase: paymentStatus, paymentRef
+
+PackagePurchase: paymentStatus, paymentRef
+
+Extend BOTH models minimally to support order tracking:
+
+Add fields:
+
+gateway String @default("razorpay")
+
+orderId String? @unique
+
+paymentId String?
+
+signature String?
+
+currency String @default("INR")
+
+Do NOT add hard limits anywhere.
+
+Run migration + regenerate Prisma client.
+
+4) Create payment utilities
+
+Create lib/payments/razorpay.ts
+
+It should export:
+
+createRazorpayOrder({ amountInPaise, receipt, notes })
+
+verifyRazorpaySignature({ orderId, paymentId, signature })
+
+Implementation details:
+
+Use new Razorpay({ key_id, key_secret })
+
+Create order with currency: "INR"
+
+Verify signature using:
+HMAC_SHA256(orderId + "|" + paymentId, KEY_SECRET) === signature
+
+Throw errors cleanly (no noisy logs)
+
+5) Payment API Routes (App Router)
+
+Create these routes:
+
+A) Create Subject Order
+
+POST /api/payments/subject/create-order
+Body: { subjectId, couponCode? }
+
+Steps:
+
+require authenticated user (use existing session system)
+
+fetch subject price
+
+apply coupon if valid (optional now; if complex, stub but keep hook)
+
+create a SubjectPurchase row with:
+
+paymentStatus=PENDING
+
+amountPaid=finalAmount
+
+gateway="razorpay"
+
+orderId=created order id
+
+paymentRef = receipt string
+
+return:
+{ keyId: RAZORPAY_KEY_ID, orderId, amount, currency, subjectName, userEmail, userName }
+
+B) Verify Subject Payment
+
+POST /api/payments/subject/verify
+Body: { subjectId, orderId, paymentId, signature }
+
+Steps:
+
+require authenticated user
+
+verify signature server-side
+
+if valid:
+
+update SubjectPurchase -> SUCCESS
+
+store paymentId + signature
+
+if invalid:
+
+mark FAILED (or keep PENDING but return error; choose FAILED for clarity)
+
+return { ok: true }
+
+C) Create Package Order
+
+POST /api/payments/package/create-order
+Body: { packageId, couponCode? }
+
+Same flow as subject, but creates PackagePurchase.
+
+D) Verify Package Payment
+
+POST /api/payments/package/verify
+Body: { packageId, orderId, paymentId, signature }
+
+Same flow as subject.
+
+6) Webhook (Recommended)
+
+Create:
+POST /api/webhooks/razorpay
+
+Verify webhook signature using RAZORPAY_WEBHOOK_SECRET
+
+On payment.captured or equivalent success event:
+
+find purchase by orderId in SubjectPurchase or PackagePurchase
+
+mark SUCCESS if still PENDING
+
+On failed events:
+
+mark FAILED if still PENDING
+
+Webhook must be idempotent (safe to call multiple times).
+
+7) UI Integration (Pricing page + Purchase buttons)
+
+Update Pricing page/cards to actually purchase:
+
+For each pricing card (Free/Pro/Team), keep UI as-is (premium), but implement click behavior:
+
+Pro → buys a default “starter package” (choose a package from DB seed; if none exists, show a calm modal: “Packages will be available soon.”)
+
+Team → buys team package (can be placeholder for now if no package exists)
+
+Also:
+On Subject pages, add “Buy Subject” button when not purchased.
+
+Clicking triggers create-order API
+
+Then opens Razorpay Checkout with returned data
+
+On success callback -> call verify API
+
+On verify success:
+
+show toast “Unlocked successfully”
+
+refresh page and unlock all sheets
+
+Use a clean “soft” modal for errors (no harsh red), and toast for success.
+
+8) Access Logic (Already exists)
+
+Do NOT change unlock logic:
+
+hasPurchased is computed via DB SUCCESS purchases
+
+worksheets unlock when SUCCESS recorded
+Ensure this works immediately after verify.
+
+9) Quality Controls
+
+No hardcoded prices in UI; always from DB
+
+Currency remains INR for now
+
+Keep code structured so Stripe replacement only touches:
+lib/payments/* + /api/payments/* + webhook route
+
+10) Final Verification Checklist (must run)
+
+Create order (subject) -> DB row PENDING with orderId
+
+Checkout success -> verify -> row SUCCESS
+
+Subject detail unlocks immediately
+
+Package purchase works similarly
+
+Webhook does not break anything
+
+No console errors, no auth regressions
+
+When done, summarize:
+
+new files created
+
+API routes
+
+Prisma changes
+
+exactly how to test in Razorpay test mode
+
+what remains for Stripe migration later
+
+Proceed now. Do not ask questions. Make sensible assumptions and keep design premium.
