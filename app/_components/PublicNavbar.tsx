@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import ThemeToggle from "./ThemeToggle";
+import ThemeDots from "./ThemeDots";
 import { useState } from "react";
 
 const links = [
@@ -46,9 +46,20 @@ export default function PublicNavbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-4">
-          <ThemeToggle />
+          <ThemeDots />
           <Link
-            href="#"
+            href="/signup"
+            className="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+            style={{
+              backgroundColor: "var(--surface)",
+              color: "var(--text-2)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            Create account
+          </Link>
+          <Link
+            href="/login"
             className="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
             style={{
               backgroundColor: "var(--primary)",
@@ -69,9 +80,7 @@ export default function PublicNavbar() {
             {menuOpen ? (
               <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             ) : (
-              <>
-                <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </>
+              <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             )}
           </svg>
         </button>
@@ -94,9 +103,20 @@ export default function PublicNavbar() {
             </Link>
           ))}
           <div className="flex items-center gap-3 pt-2">
-            <ThemeToggle />
+            <ThemeDots />
             <Link
-              href="#"
+              href="/signup"
+              className="rounded-lg px-4 py-2 text-sm font-medium"
+              style={{
+                backgroundColor: "var(--surface)",
+                color: "var(--text-2)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              Create account
+            </Link>
+            <Link
+              href="/login"
               className="rounded-lg px-4 py-2 text-sm font-medium"
               style={{
                 backgroundColor: "var(--primary)",

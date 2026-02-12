@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import ThemeToggle from "./ThemeToggle";
+import ThemeDots from "./ThemeDots";
 import { useState } from "react";
 
 const links = [
@@ -46,7 +46,7 @@ export default function StudentNavbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-4">
-          <ThemeToggle />
+          <ThemeDots />
           <div
             className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold"
             style={{
@@ -91,7 +91,7 @@ export default function StudentNavbar() {
             </Link>
           ))}
           <div className="pt-2">
-            <ThemeToggle />
+            <ThemeDots />
           </div>
         </div>
       )}

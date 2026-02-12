@@ -1,0 +1,54 @@
+Update the Meritrix Next.js App Router project to make the navbar actions more premium and space-efficient.
+
+GOALS (3 tasks):
+1) In the Public navbar, place a “Create account” button to the LEFT of the “Login” button.
+2) Replace the current Theme toggle (text-based) with a compact “color dot” theme switcher (two dots) so it uses minimal space:
+   - Dot 1: Deep Teal (#0F5C5C) = default theme
+   - Dot 2: Lavender (#5E5CE6)
+   - Active theme must show a clear but subtle selection indicator (ring/border) that looks premium.
+3) Apply the same dot-based theme switcher to StudentNavbar and AdminNavbar too (replace old ThemeToggle everywhere).
+   - Public navbar right side order: ThemeDots, Create account, Login (Create account must be left of Login).
+   - Student/Admin navbars: ThemeDots should be present in the right-side actions area, keeping spacing clean.
+
+CONSTRAINTS:
+- Do not change overall layout structure or styling system. Only update navbar action area + theme toggle component.
+- Keep the UI premium: consistent spacing, no clutter, no loud colors, no text toggle.
+- Use existing CSS variables and the existing data-theme mechanism on <html>.
+- Persist theme choice in localStorage key "mx_theme".
+- The theme toggle must set document.documentElement.dataset.theme = "teal" or "lavender".
+- No auth logic yet; just placeholders.
+
+IMPLEMENTATION STEPS:
+A) Create a new client component at: app/_components/ThemeDots.tsx
+   - Render two small circular buttons (dots) with the two colors.
+   - Clicking a dot updates data-theme and localStorage.
+   - On mount, read localStorage and apply theme.
+   - The active dot shows a subtle ring or border (using var(--ring) and/or var(--border)).
+
+B) Update these files to use ThemeDots instead of ThemeToggle:
+   - app/_components/PublicNavbar.tsx
+   - app/_components/StudentNavbar.tsx
+   - app/_components/AdminNavbar.tsx
+
+C) Public navbar action area:
+   - Right side should show (left → right): ThemeDots, Create account, Login
+   - “Create account” should be a secondary-style button (surface background + border).
+   - “Login” should be primary-style button (var(--primary) background).
+   - Use consistent button sizing, padding, and rounded corners.
+
+D) Add placeholder public routes so navbar links don’t 404:
+   - app/(public)/login/page.tsx
+   - app/(public)/signup/page.tsx
+   Both pages can say “Coming soon” and mention auth will be implemented after Prisma.
+
+E) Remove/stop using the old ThemeToggle component if it exists, or leave it unused but ensure navbars use ThemeDots.
+
+After changes:
+- Ensure TypeScript builds without errors.
+- Ensure theme switching works on all layouts (/ , /dashboard, /admin).
+- Ensure “Create account” appears left of “Login” in the public navbar.
+
+Finally, output the list of modified/created files and show the final code for:
+- app/_components/ThemeDots.tsx
+- the updated navbar action section in PublicNavbar.tsx
+- the placeholder login/signup page files
