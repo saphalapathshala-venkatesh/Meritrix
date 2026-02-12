@@ -4,10 +4,20 @@
 Meritrix is a premium learning platform MVP built with Next.js (App Router), TypeScript, Tailwind CSS, Prisma ORM, and PostgreSQL. The project has a premium UI skeleton with a design token system (Deep Teal + Lavender themes), and a production-ready database schema.
 
 ## Recent Changes
-- 2026-02-12: Prisma + PostgreSQL setup
-  - Installed prisma, @prisma/client, dotenv
-  - Created full schema: Users, Sessions, Grades, Subjects, Chapters, Worksheets, Completions, Purchases, Packages, DrillPacks, DrillAttempts, LiveSessions, LiveBookings, Coupons, CouponUsages
+- 2026-02-12: Authentication system (Module A)
+  - Register, Login, Logout, Me API routes (app/api/auth/*)
+  - bcryptjs password hashing (12 rounds), SHA256 session tokens
+  - Single-device login enforcement (old sessions deleted on new login)
+  - HttpOnly cookie-based sessions, 30-day expiry
+  - Middleware for route protection (cookie-presence check, Edge Runtime compatible)
+  - Login/signup pages with working forms and error handling
+- 2026-02-12: Prisma v7 adapter setup
+  - Using @prisma/adapter-pg with PrismaPg({ connectionString }) pattern
+  - prisma-client-js provider with client engine + pg adapter
   - Prisma client singleton in lib/prisma.ts (hot-reload safe)
+- 2026-02-12: Prisma + PostgreSQL setup
+  - Installed prisma, @prisma/client, @prisma/adapter-pg, pg, bcryptjs
+  - Created full schema: Users, Sessions, Grades, Subjects, Chapters, Worksheets, Completions, Purchases, Packages, DrillPacks, DrillAttempts, LiveSessions, LiveBookings, Coupons, CouponUsages
   - Initial migration applied successfully (17 tables)
 - 2026-02-12: Homepage polish — banners, feature cards, pricing
   - Added PromoBanner component with theme-adaptive gradient overlays
@@ -59,8 +69,16 @@ app/
   (admin)/
     layout.tsx            # AdminNavbar
     admin/page.tsx        # Admin dashboard
+  api/
+    auth/
+      register/route.ts   # POST: create user + session
+      login/route.ts      # POST: authenticate + session
+      logout/route.ts     # POST: destroy session
+      me/route.ts         # GET: current user from session
 lib/
-  prisma.ts               # Prisma client singleton (hot-reload safe)
+  prisma.ts               # Prisma client singleton (PrismaPg adapter, hot-reload safe)
+  auth.ts                 # Auth helpers: hash, verify, session CRUD, cookies
+middleware.ts             # Route protection (cookie-presence check, Edge-compatible)
 prisma/
   schema.prisma           # Full data model
   migrations/             # Migration history

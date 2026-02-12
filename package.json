@@ -8,6 +8,7 @@
     "start": "next start -p 5000 -H 0.0.0.0"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "^7.4.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/bcryptjs": "^2.4.6",
@@ -17,6 +18,7 @@
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.4",
     "next": "^16.1.6",
+    "pg": "^8.18.0",
     "postcss": "^8.5.6",
     "prisma": "^7.4.0",
     "react": "^19.2.4",
