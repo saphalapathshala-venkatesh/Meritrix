@@ -71,8 +71,8 @@ export default function SubjectDetailPage() {
   const [confirmModal, setConfirmModal] = useState<{
     worksheetId: string;
     title: string;
-    completing: boolean;
   } | null>(null);
+  const [lockedModal, setLockedModal] = useState(false);
   const [toggling, setToggling] = useState(false);
 
   const fetchData = useCallback(() => {
@@ -90,8 +90,9 @@ export default function SubjectDetailPage() {
   }, [fetchData]);
 
   const handleToggle = (ws: Worksheet) => {
+    if (ws.isLocked) return;
     if (!ws.isCompleted) {
-      setConfirmModal({ worksheetId: ws.id, title: ws.title, completing: true });
+      setConfirmModal({ worksheetId: ws.id, title: ws.title });
     } else {
       doToggle(ws.id, false);
     }
@@ -221,6 +222,7 @@ export default function SubjectDetailPage() {
                             key={ws.id}
                             ws={ws}
                             onToggle={() => handleToggle(ws)}
+                            onLockedClick={() => setLockedModal(true)}
                           />
                         ))}
                       </div>
@@ -256,6 +258,29 @@ export default function SubjectDetailPage() {
           </Button>
         </div>
       </Modal>
+
+      <Modal
+        open={lockedModal}
+        onClose={() => setLockedModal(false)}
+        title="Unlock Full Access"
+      >
+        <p className="text-sm mb-2" style={{ color: "var(--text-2)" }}>
+          This worksheet is part of the complete {subject.name} learning path.
+        </p>
+        <p className="text-sm mb-6" style={{ color: "var(--muted)" }}>
+          Unlock all chapters, worksheets, and practice material to get the most out of your preparation. You can explore our plans to find what works best for you.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button variant="ghost" onClick={() => setLockedModal(false)}>
+            Maybe Later
+          </Button>
+          <Link href="/#pricing">
+            <Button onClick={() => setLockedModal(false)}>
+              View Pricing
+            </Button>
+          </Link>
+        </div>
+      </Modal>
     </>
   );
 }
@@ -263,10 +288,14 @@ export default function SubjectDetailPage() {
 function WorksheetRow({
   ws,
   onToggle,
+  onLockedClick,
 }: {
   ws: Worksheet;
   onToggle: () => void;
+  onLockedClick: () => void;
 }) {
+  const isAccessible = ws.isFree || !ws.isLocked;
+
   return (
     <div
       className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
@@ -294,42 +323,47 @@ function WorksheetRow({
       <span
         className="flex-1 text-sm min-w-0"
         style={{
-          color: ws.isCompleted ? "var(--primary)" : "var(--text)",
+          color: ws.isCompleted ? "var(--primary)" : ws.isLocked ? "var(--muted)" : "var(--text)",
           textDecoration: ws.isCompleted ? "line-through" : "none",
         }}
       >
         {ws.title}
       </span>
 
-      {ws.isFree ? (
+      {ws.isFree && (
         <span
           className="flex-shrink-0 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full"
           style={{ backgroundColor: "#DEF7EC", color: "#03543F" }}
         >
           Free
         </span>
-      ) : ws.isLocked ? (
-        <span
-          className="flex-shrink-0 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full"
-          style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
-        >
-          Locked
-        </span>
-      ) : null}
+      )}
 
-      {!ws.isLocked && ws.pdfUrl && (
-        <a
-          href={ws.pdfUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-shrink-0 text-xs font-medium px-2.5 py-1 rounded-md transition-colors"
+      {isAccessible ? (
+        <button
+          onClick={() => {
+            if (ws.pdfUrl) window.open(ws.pdfUrl, "_blank");
+          }}
+          className="flex-shrink-0 text-xs font-medium px-2.5 py-1 rounded-md transition-colors cursor-pointer"
           style={{
             backgroundColor: "var(--primary-soft)",
             color: "var(--primary)",
           }}
         >
-          View
-        </a>
+          View Worksheet
+        </button>
+      ) : (
+        <button
+          onClick={onLockedClick}
+          className="flex-shrink-0 text-xs font-medium px-2.5 py-1 rounded-md transition-colors cursor-pointer"
+          style={{
+            backgroundColor: "#F8FAFC",
+            color: "var(--muted)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          Unlock to Access
+        </button>
       )}
     </div>
   );

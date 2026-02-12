@@ -10,10 +10,15 @@ export async function GET() {
 
   const userId = session.user.id;
 
+  const grades = await prisma.grade.findMany({
+    orderBy: { sortOrder: "asc" },
+    select: { id: true, name: true, sortOrder: true },
+  });
+
   const subjects = await prisma.subject.findMany({
     orderBy: [{ grade: { sortOrder: "asc" } }, { sortOrder: "asc" }],
     include: {
-      grade: { select: { name: true } },
+      grade: { select: { id: true, name: true } },
       chapters: {
         include: {
           worksheets: {
@@ -43,6 +48,7 @@ export async function GET() {
     return {
       id: s.id,
       name: s.name,
+      gradeId: s.grade.id,
       gradeName: s.grade.name,
       total,
       completed,
@@ -55,6 +61,7 @@ export async function GET() {
   const overallPercent = totalWorksheets > 0 ? Math.round((totalCompleted / totalWorksheets) * 100) : 0;
 
   return NextResponse.json({
+    grades,
     overallPercent,
     totalWorksheets,
     totalCompleted,

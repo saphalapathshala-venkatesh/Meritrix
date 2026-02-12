@@ -1,13 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardHeader, CardBody } from "../../_components/Card";
 import ProgressBar from "../../_components/ProgressBar";
 
+interface Grade {
+  id: string;
+  name: string;
+  sortOrder: number;
+}
+
 interface SubjectProgress {
   id: string;
   name: string;
+  gradeId: string;
   gradeName: string;
   total: number;
   completed: number;
@@ -15,6 +22,7 @@ interface SubjectProgress {
 }
 
 interface DashboardData {
+  grades: Grade[];
   overallPercent: number;
   totalWorksheets: number;
   totalCompleted: number;
@@ -24,13 +32,28 @@ interface DashboardData {
 export default function StudentDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedGradeId, setSelectedGradeId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/dashboard")
       .then((r) => r.json())
-      .then((d) => setData(d))
+      .then((d: DashboardData) => {
+        setData(d);
+        if (d.grades?.length) {
+          setSelectedGradeId(d.grades[0].id);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  const filtered = useMemo(() => {
+    if (!data || !selectedGradeId) return { subjects: [], total: 0, completed: 0, percent: 0 };
+    const subjects = data.subjects.filter((s) => s.gradeId === selectedGradeId);
+    const total = subjects.reduce((a, s) => a + s.total, 0);
+    const completed = subjects.reduce((a, s) => a + s.completed, 0);
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { subjects, total, completed, percent };
+  }, [data, selectedGradeId]);
 
   if (loading) {
     return (
@@ -50,27 +73,59 @@ export default function StudentDashboard() {
 
   return (
     <>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--text)" }}>
-          Dashboard
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
-          Welcome back! Here is your learning overview.
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: "var(--text)" }}>
+            Dashboard
+          </h1>
+          <p className="text-sm mt-1" style={{ color: "var(--text-2)" }}>
+            Welcome back! Here is your learning overview.
+          </p>
+        </div>
+        {data.grades.length > 1 && (
+          <div className="relative">
+            <select
+              value={selectedGradeId || ""}
+              onChange={(e) => setSelectedGradeId(e.target.value)}
+              className="appearance-none text-sm font-medium pl-3 pr-8 py-2 rounded-lg cursor-pointer"
+              style={{
+                backgroundColor: "var(--primary-soft)",
+                color: "var(--primary)",
+                border: "1px solid var(--border)",
+                outline: "none",
+              }}
+            >
+              {data.grades.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+            <svg
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+            >
+              <path d="M3 4.5l3 3 3-3" stroke="var(--primary)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        )}
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardHeader>
             <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
-              Overall Progress
+              Grade Progress
             </p>
           </CardHeader>
           <CardBody>
             <p className="text-3xl font-bold mb-4" style={{ color: "var(--text)" }}>
-              {data.overallPercent}%
+              {filtered.percent}%
             </p>
-            <ProgressBar value={data.overallPercent} label="Worksheet completion" />
+            <ProgressBar value={filtered.percent} label="Worksheet completion" />
           </CardBody>
         </Card>
 
@@ -82,10 +137,10 @@ export default function StudentDashboard() {
           </CardHeader>
           <CardBody>
             <p className="text-3xl font-bold mb-1" style={{ color: "var(--text)" }}>
-              {data.totalCompleted}
+              {filtered.completed}
             </p>
             <p className="text-sm" style={{ color: "var(--text-2)" }}>
-              of {data.totalWorksheets} total
+              of {filtered.total} total
             </p>
           </CardBody>
         </Card>
@@ -98,10 +153,10 @@ export default function StudentDashboard() {
           </CardHeader>
           <CardBody>
             <p className="text-3xl font-bold mb-1" style={{ color: "var(--text)" }}>
-              {data.subjects.length}
+              {filtered.subjects.length}
             </p>
             <p className="text-sm" style={{ color: "var(--text-2)" }}>
-              across all grades
+              in this grade
             </p>
           </CardBody>
         </Card>
@@ -123,20 +178,20 @@ export default function StudentDashboard() {
           </div>
         </CardHeader>
         <CardBody className="flex flex-col gap-5">
-          {data.subjects.length === 0 ? (
+          {filtered.subjects.length === 0 ? (
             <p className="text-sm text-center py-4" style={{ color: "var(--muted)" }}>
-              No subjects available yet.
+              No subjects available for this grade.
             </p>
           ) : (
-            data.subjects.map((s) => (
+            filtered.subjects.map((s) => (
               <div key={s.id}>
                 <ProgressBar
                   value={s.completed}
                   max={s.total || 1}
-                  label={`${s.name} (${s.gradeName})`}
+                  label={s.name}
                 />
                 <p className="text-[11px] mt-0.5" style={{ color: "var(--muted)" }}>
-                  {s.completed} / {s.total} completed
+                  {s.completed} / {s.total} Worksheets Completed
                 </p>
               </div>
             ))
