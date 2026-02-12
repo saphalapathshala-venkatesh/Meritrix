@@ -1,0 +1,123 @@
+We already finished Prisma + Postgres schema + migrate + generate. Do NOT touch Prisma schema now.
+
+Goal (Module A - Auth):
+Implement robust authentication using DB-backed sessions (Session table) with:
+- Register (email OR mobile OR username as identifier)
+- Login (identifier + password)
+- Logout
+- Single-device login: logging in on a new device invalidates previous sessions automatically
+- No infinite redirects, no auto-refresh login loop
+- No duplicate users due to casing/spaces/mobile formats
+- Use HttpOnly cookie session token
+- Middleware protection for /dashboard and all private routes
+- Role support: STUDENT / ADMIN (admin routes protected)
+
+Constraints:
+1) DO NOT rewrite existing UI pages unless required.
+2) DO NOT remove existing components/styles.
+3) Keep everything minimal but correct and production-safe.
+4) Use Next.js App Router (app/).
+5) Must work in Replit preview (cross-origin safe).
+6) No external auth provider (no NextAuth).
+
+STEP 1 — Add dependencies:
+- bcryptjs
+- zod
+- cookie (if needed)
+
+Run:
+npm i bcryptjs zod
+npm i -D @types/bcryptjs
+
+STEP 2 — Create auth utils:
+Create: /lib/auth.ts with:
+- normalizeIdentifier(input): trims, lowercases email, removes spaces/hyphens from phone, keeps username lowercase
+- hashPassword(password)
+- verifyPassword(password, hash)
+- createSession(userId, userAgent, ip): creates a new session token, deletes old sessions for that user (single-device rule)
+- getSessionFromRequest(cookies): reads token, validates in DB, returns user
+- destroySession(token): deletes session in DB
+
+Token rules:
+- Generate token via crypto.randomUUID() + random bytes
+- Store token hash in DB (NOT raw token). Use sha256.
+- Cookie stores raw token; DB stores hash.
+
+Cookie rules:
+- Name: meritrix_session
+- httpOnly: true
+- sameSite: "lax"
+- secure: true only in production
+- path: "/"
+- maxAge: 30 days
+
+STEP 3 — API routes (App Router):
+Create:
+- /app/api/auth/register/route.ts (POST)
+- /app/api/auth/login/route.ts (POST)
+- /app/api/auth/logout/route.ts (POST)
+- /app/api/auth/me/route.ts (GET)
+
+Validation:
+Use zod.
+Register requires: identifier, password, name (optional)
+Login requires: identifier, password
+
+Duplicate-user protection:
+On register:
+- normalize identifier
+- check if existing user exists by email OR mobile OR username matching normalized rules
+- if exists, return 409 with friendly message
+
+Password storage:
+- bcrypt hash with 12 rounds
+
+Session creation:
+- On login/register, createSession and set cookie
+
+STEP 4 — Middleware protection:
+Create /middleware.ts:
+- Protect routes that require login:
+  /dashboard
+  /worksheets (private parts)
+  /drills
+  /sessions/book
+  /account
+  /admin (requires ADMIN role)
+- Public routes remain open:
+  /
+  /pricing
+  /worksheets (public browsing allowed if that page is designed as public)
+  /login
+  /register
+
+Middleware behavior:
+- If no session and route is protected => redirect to /login?from=...
+- If session exists and user goes to /login or /register => redirect to /dashboard
+- If route starts with /admin and role != ADMIN => redirect to /dashboard
+
+STEP 5 — Minimal UI pages (only if missing):
+Create if not present:
+- /app/login/page.tsx
+- /app/register/page.tsx
+- /app/dashboard/page.tsx
+
+Requirements:
+- Use existing styling tokens and theme system
+- Form should call API routes via fetch with credentials:"include"
+- On success, router.replace(from || "/dashboard")
+- Show clean error text (no alerts)
+
+STEP 6 — Add a small debug endpoint for development only:
+- /app/api/debug/session/route.ts (GET)
+Returns session status + user (only when NODE_ENV != "production")
+
+STEP 7 — Verify:
+- Register creates user + 1 session, sets cookie, opens dashboard
+- Login invalidates previous sessions (single-device enforced)
+- Logout clears cookie + deletes DB session
+- Refresh dashboard does not redirect incorrectly
+- No cross-origin cookie failure in Replit preview
+
+After implementation:
+Print a short checklist confirming each item is working.
