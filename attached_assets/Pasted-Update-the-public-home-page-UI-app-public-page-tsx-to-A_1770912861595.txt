@@ -1,0 +1,78 @@
+Update the public home page UI (app/(public)/page.tsx) to (A) add 3 premium image+text banners, (B) fix feature cards text alignment/spacing, and (C) refine pricing cards behavior + CTA button sizing. Keep the existing Deep Teal design system and layout structure. Do not add new features beyond what’s listed.
+
+A) ADD 3 PREMIUM IMAGE BANNERS (image + text overlay)
+Goal: 3 reusable promo banners with clean education-themed images and readable text overlay.
+- Create /public/images/banners/ if missing.
+- Use these image paths (create placeholders if real images not available yet):
+  1) /public/images/banners/banner-worksheets.jpg
+  2) /public/images/banners/banner-drills.jpg
+  3) /public/images/banners/banner-live.jpg
+- Implement a reusable component PromoBanner (either inside page.tsx or app/_components/PromoBanner.tsx):
+  Props: title, subtitle, ctaText, ctaHref, imageSrc
+- Banner styling:
+  - rounded-2xl, subtle border, soft shadow
+  - background image with dark/teal gradient overlay so text is always readable
+  - no loud colors, premium calm look
+  - responsive: desktop text left, mobile stacked
+- Place banners:
+  1) Under Hero and above “Everything you need to excel” section
+  2) Between feature cards section and pricing section
+  3) Above pricing section OR immediately before pricing heading (choose whichever looks cleaner)
+- Banner placeholder content:
+  Banner 1: “Start with Worksheets that Build Mastery”
+    subtitle: “Foundational → Skill Builder → Mastery, aligned to curriculum.”
+    CTA: “Explore Worksheets” -> /worksheets
+  Banner 2: “Merit Drills: Rapid Reinforcement”
+    subtitle: “Timed practice, XP rewards, and smarter revision.”
+    CTA: “Try Merit Drills” -> /drills
+  Banner 3: “Live Sessions that Move the Needle”
+    subtitle: “1:1 or small batches — focused, outcome-driven.”
+    CTA: “Book a Session” -> /sessions
+
+B) FIX “EVERYTHING YOU NEED TO EXCEL” FEATURE CARDS ALIGNMENT (no vague gaps)
+Problem: title/description spacing and alignment feels uneven.
+Fix requirements:
+- Keep the two-tone card design (top white area for icon, bottom tinted area for text).
+- Make all 3 cards use identical internal vertical rhythm:
+  - Icon row: fixed height container (e.g., h-20) with consistent padding (p-6)
+  - Bottom text area: px-6 pt-5 pb-6
+  - Title: same font size and margin (mt-0), consistent line height
+  - Description: use consistent line height (leading-7), and set a min-height for the description block so all cards align visually.
+- Remove any accidental margins/padding causing uneven empty spaces.
+- Ensure the left padding of title and description aligns perfectly under each other for all cards.
+
+C) PRICING SECTION: REMOVE AUTO-HIGHLIGHT, FIX CTA BUTTON “EMPTY SPACE”
+Issues:
+1) No card should be highlighted by default (the green border on PRO should NOT appear on page load).
+   - Borders/active state should appear ONLY on user interaction (click/select).
+2) CTA buttons still look like they have “empty space”.
+Fix requirements:
+- Remove the default “featured” styling/border on PRO card.
+- Implement interactive selection (client-side only):
+  - On click of a pricing card (or its CTA), that card becomes “selected”
+  - Only the selected card shows a border highlight (using var(--primary) border)
+  - Default: no selected card
+- CTA buttons:
+  - Make them either true full-width (recommended): w-full, h-12, justify-center, text centered
+  - Remove excessive horizontal padding that makes it feel empty
+  - Ensure identical button size across all 3 cards
+  - All pricing CTAs should be dark primary style (bg var(--primary), text var(--on-primary))
+- Keep pricing content as placeholder; we will rewrite later.
+
+FILES TO EDIT:
+- app/(public)/page.tsx (primary)
+- Create PromoBanner component (page.tsx or app/_components/PromoBanner.tsx)
+- Add banner images (placeholders ok) in /public/images/banners/
+
+IMPORTANT CONSTRAINTS:
+- Do not change global token system.
+- Do not introduce new dependencies.
+- Do not clutter the page; keep spacing premium and consistent.
+- Ensure headings and section spacing remain clean and aligned.
+
+After changes:
+- Output which files were created/modified.
+- Show final code for:
+  - PromoBanner component
+  - Feature cards section JSX
+  - Pricing section JSX (including selection logic)

@@ -16,6 +16,7 @@ export default function Button({
   disabled,
   children,
   className = "",
+  style,
   ...props
 }: ButtonProps) {
   const isDisabled = disabled || loading;
@@ -50,7 +51,7 @@ export default function Button({
   return (
     <button
       className={`${base} ${variants[variant]} ${className}`}
-      style={variantStyle[variant]}
+      style={{ ...variantStyle[variant], ...style }}
       disabled={isDisabled}
       {...props}
     >

@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import Button from "../_components/Button";
+import PromoBanner from "../_components/PromoBanner";
 
 const features = [
   {
@@ -43,7 +47,33 @@ const plans = [
   { name: "Team", price: "$29", features: "Everything in Pro + admin tools, bulk licenses", cta: "Get started" },
 ];
 
+const banners = [
+  {
+    title: "Start with Worksheets that Build Mastery",
+    subtitle: "Foundational \u2192 Skill Builder \u2192 Mastery, aligned to curriculum.",
+    ctaText: "Explore Worksheets",
+    ctaHref: "/worksheets",
+    imageSrc: "/images/banners/banner-worksheets.png",
+  },
+  {
+    title: "Merit Drills: Rapid Reinforcement",
+    subtitle: "Timed practice, XP rewards, and smarter revision.",
+    ctaText: "Try Merit Drills",
+    ctaHref: "/drills",
+    imageSrc: "/images/banners/banner-drills.png",
+  },
+  {
+    title: "Live Sessions that Move the Needle",
+    subtitle: "1:1 or small batches \u2014 focused, outcome-driven.",
+    ctaText: "Book a Session",
+    ctaHref: "/sessions",
+    imageSrc: "/images/banners/banner-live.png",
+  },
+];
+
 export default function HomePage() {
+  const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
+
   return (
     <>
       <section className="mx-section">
@@ -70,6 +100,12 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="mx-section" style={{ paddingTop: "0" }}>
+        <div className="mx-container">
+          <PromoBanner {...banners[0]} />
+        </div>
+      </section>
+
       <section className="mx-section" style={{ backgroundColor: "var(--surface)" }}>
         <div className="mx-container">
           <h2
@@ -89,9 +125,9 @@ export default function HomePage() {
                   boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
                 }}
               >
-                <div className="px-6 pt-6 pb-5">
+                <div className="px-6 pt-6 pb-4 flex items-start" style={{ height: "80px" }}>
                   <div
-                    className="h-11 w-11 rounded-lg flex items-center justify-center"
+                    className="h-11 w-11 rounded-lg flex items-center justify-center shrink-0"
                     style={{
                       backgroundColor: "var(--primary-soft)",
                       color: "var(--primary)",
@@ -105,14 +141,14 @@ export default function HomePage() {
                   style={{ backgroundColor: "var(--primary-soft)" }}
                 >
                   <h3
-                    className="text-base font-semibold mb-2"
-                    style={{ color: "var(--text)", lineHeight: "1.4" }}
+                    className="font-semibold mb-2"
+                    style={{ color: "var(--text)", fontSize: "15px", lineHeight: "1.4" }}
                   >
                     {f.title}
                   </h3>
                   <p
                     className="text-sm flex-1"
-                    style={{ color: "var(--text-2)", lineHeight: "1.7" }}
+                    style={{ color: "var(--text-2)", lineHeight: "1.7", minHeight: "72px" }}
                   >
                     {f.description}
                   </p>
@@ -120,6 +156,18 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="mx-section">
+        <div className="mx-container">
+          <PromoBanner {...banners[1]} />
+        </div>
+      </section>
+
+      <section className="mx-section" style={{ paddingBottom: "0" }}>
+        <div className="mx-container">
+          <PromoBanner {...banners[2]} />
         </div>
       </section>
 
@@ -135,14 +183,18 @@ export default function HomePage() {
             {plans.map((p, i) => (
               <div
                 key={p.name}
-                className="rounded-xl p-6"
+                className="rounded-xl p-6 transition-shadow cursor-pointer"
                 style={{
                   backgroundColor: "var(--surface)",
-                  border: i === 1
+                  border: selectedPlan === i
                     ? "2px solid var(--primary)"
                     : "1px solid var(--border)",
-                  boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
+                  padding: selectedPlan === i ? "23px" : "24px",
+                  boxShadow: selectedPlan === i
+                    ? "0 4px 12px 0 rgb(0 0 0 / 0.08)"
+                    : "0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
                 }}
+                onClick={() => setSelectedPlan(i)}
               >
                 <p
                   className="text-sm font-semibold uppercase tracking-wider mb-1"
@@ -165,7 +217,14 @@ export default function HomePage() {
                 <p className="text-sm mb-5" style={{ color: "var(--text-2)" }}>
                   {p.features}
                 </p>
-                <Button className="w-full">
+                <Button
+                  className="w-full"
+                  style={{ height: "48px" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedPlan(i);
+                  }}
+                >
                   {p.cta}
                 </Button>
               </div>
