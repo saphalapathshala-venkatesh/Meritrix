@@ -4,6 +4,18 @@
 Meritrix is a premium learning platform MVP built with Next.js (App Router), TypeScript, Tailwind CSS, Prisma ORM, and PostgreSQL. The project has a premium UI skeleton with a design token system (Deep Teal + Lavender themes), and a production-ready database schema.
 
 ## Recent Changes
+- 2026-02-12: Razorpay Payment Integration
+  - lib/payments/razorpay.ts: createRazorpayOrder, verifyRazorpaySignature, verifyWebhookSignature
+  - lib/razorpay-checkout.ts: client-side loadRazorpayScript + openRazorpayCheckout helper
+  - SubjectPurchase & PackagePurchase models extended with gateway, orderId, paymentId, signature, currency
+  - API routes: POST /api/payments/subject/create-order, POST /api/payments/subject/verify
+  - API routes: POST /api/payments/package/create-order, POST /api/payments/package/verify
+  - Webhook: POST /api/webhooks/razorpay (idempotent, handles captured/failed events)
+  - Public API: GET /api/packages/list (active packages for pricing page)
+  - Subject detail page: "Buy for ₹X" button opens Razorpay Checkout, verifies, unlocks content
+  - Pricing page: reads packages from DB, opens Razorpay Checkout for Pro/Team plans
+  - Gateway-agnostic design: swap to Stripe by changing lib/payments/* + API routes only
+  - Secrets: RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET in Replit Secrets
 - 2026-02-12: Full Admin Panel
   - Admin dashboard with live statistics (users, worksheets, subjects, packages, coupons)
   - Users management: search, block/unblock, delete, reset password
@@ -129,11 +141,22 @@ app/
       worksheets/route.ts # CRUD: worksheet management
       packages/route.ts   # CRUD: package management
       coupons/route.ts    # CRUD: coupon management
+    payments/
+      subject/create-order/route.ts  # POST: create Razorpay order for subject
+      subject/verify/route.ts        # POST: verify Razorpay payment for subject
+      package/create-order/route.ts  # POST: create Razorpay order for package
+      package/verify/route.ts        # POST: verify Razorpay payment for package
+    webhooks/
+      razorpay/route.ts    # POST: Razorpay webhook (idempotent)
+    packages/
+      list/route.ts        # GET: public list of active packages
 lib/
   prisma.ts               # Prisma client singleton (PrismaPg adapter, hot-reload safe)
   auth.ts                 # Auth helpers: hash, verify, session CRUD, cookies
   guards.ts               # Server-side route guards: requireUser(), requireAdmin()
   admin-auth.ts           # Admin API guard: requireAdminApi()
+  payments/razorpay.ts    # Razorpay server-side utilities (order creation, signature verification)
+  razorpay-checkout.ts    # Client-side Razorpay Checkout loader + opener
 middleware.ts             # Route protection (cookie-presence check, Edge-compatible)
 prisma/
   schema.prisma           # Full data model

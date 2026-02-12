@@ -7,6 +7,7 @@ import { Card } from "../../../../_components/Card";
 import Badge from "../../../../_components/Badge";
 import Modal from "../../../../_components/Modal";
 import Button from "../../../../_components/Button";
+import { loadRazorpayScript, openRazorpayCheckout } from "../../../../../lib/razorpay-checkout";
 
 interface Worksheet {
   id: string;
@@ -74,6 +75,9 @@ export default function SubjectDetailPage() {
   } | null>(null);
   const [lockedModal, setLockedModal] = useState(false);
   const [toggling, setToggling] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false);
 
   const fetchData = useCallback(() => {
     fetch(`/api/worksheets/subject/${subjectId}`)
@@ -117,6 +121,76 @@ export default function SubjectDetailPage() {
     } finally {
       setToggling(false);
       setConfirmModal(null);
+    }
+  };
+
+  const handleBuySubject = async () => {
+    if (!subject) return;
+    setPurchasing(true);
+    setPurchaseError(null);
+
+    try {
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        setPurchaseError("Could not load payment system. Please try again.");
+        setPurchasing(false);
+        return;
+      }
+
+      const res = await fetch("/api/payments/subject/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subjectId: subject.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPurchaseError(data.error || "Could not create order.");
+        setPurchasing(false);
+        return;
+      }
+
+      openRazorpayCheckout({
+        keyId: data.keyId,
+        orderId: data.orderId,
+        amount: data.amount,
+        currency: data.currency,
+        name: data.subjectName,
+        description: `Unlock ${data.subjectName}`,
+        userEmail: data.userEmail,
+        userName: data.userName,
+        onSuccess: async (response) => {
+          try {
+            const verifyRes = await fetch("/api/payments/subject/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                subjectId: subject.id,
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyRes.ok && verifyData.ok) {
+              setPurchaseSuccess(true);
+              setLockedModal(false);
+              setLoading(true);
+              fetchData();
+            } else {
+              setPurchaseError(verifyData.error || "Payment verification failed. If your amount was deducted, it will be refunded.");
+            }
+          } catch {
+            setPurchaseError("Something went wrong verifying payment. Please contact support if charged.");
+          }
+          setPurchasing(false);
+        },
+        onDismiss: () => {
+          setPurchasing(false);
+        },
+      });
+    } catch {
+      setPurchaseError("Something went wrong. Please try again.");
+      setPurchasing(false);
     }
   };
 
@@ -165,10 +239,36 @@ export default function SubjectDetailPage() {
         </div>
         {subject.hasPurchased ? (
           <Badge>Purchased</Badge>
+        ) : subject.price > 0 ? (
+          <Button
+            onClick={handleBuySubject}
+            loading={purchasing}
+            style={{ height: "40px", fontSize: "14px" }}
+          >
+            Buy for ₹{subject.price}
+          </Button>
         ) : (
-          <Badge>₹{subject.price}</Badge>
+          <Badge>Free</Badge>
         )}
       </div>
+
+      {purchaseSuccess && (
+        <div
+          className="mb-6 px-4 py-3 rounded-lg text-sm font-medium"
+          style={{ backgroundColor: "#F0FDF4", color: "#166534", border: "1px solid #BBF7D0" }}
+        >
+          Unlocked successfully! All worksheets are now available.
+        </div>
+      )}
+
+      {purchaseError && (
+        <div
+          className="mb-6 px-4 py-3 rounded-lg text-sm font-medium"
+          style={{ backgroundColor: "#FFFBEB", color: "#92400E", border: "1px solid #FDE68A" }}
+        >
+          {purchaseError}
+        </div>
+      )}
 
       {chapters.length === 0 ? (
         <Card>
@@ -268,17 +368,21 @@ export default function SubjectDetailPage() {
           This worksheet is part of the complete {subject.name} learning path.
         </p>
         <p className="text-sm mb-6" style={{ color: "var(--muted)" }}>
-          Unlock all chapters, worksheets, and practice material to get the most out of your preparation. You can explore our plans to find what works best for you.
+          Unlock all chapters, worksheets, and practice material to get the most out of your preparation.
         </p>
         <div className="flex gap-3 justify-end">
           <Button variant="ghost" onClick={() => setLockedModal(false)}>
             Maybe Later
           </Button>
-          <Link href="/#pricing">
-            <Button onClick={() => setLockedModal(false)}>
-              View Pricing
-            </Button>
-          </Link>
+          <Button
+            loading={purchasing}
+            onClick={() => {
+              setLockedModal(false);
+              handleBuySubject();
+            }}
+          >
+            Buy for ₹{subject.price}
+          </Button>
         </div>
       </Modal>
     </>

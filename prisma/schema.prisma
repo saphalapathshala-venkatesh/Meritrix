@@ -165,6 +165,11 @@ model SubjectPurchase {
   paymentStatus PaymentStatus @default(PENDING)
   paymentRef    String?
   couponId      String?
+  gateway       String        @default("razorpay")
+  orderId       String?       @unique
+  paymentId     String?
+  signature     String?
+  currency      String        @default("INR")
   purchasedAt   DateTime      @default(now())
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -200,6 +205,11 @@ model PackagePurchase {
   paymentStatus PaymentStatus @default(PENDING)
   paymentRef    String?
   couponId      String?
+  gateway       String        @default("razorpay")
+  orderId       String?       @unique
+  paymentId     String?
+  signature     String?
+  currency      String        @default("INR")
   purchasedAt   DateTime      @default(now())
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
