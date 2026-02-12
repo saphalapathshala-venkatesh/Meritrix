@@ -4,6 +4,11 @@
 Meritrix is a premium learning platform MVP built with Next.js (App Router), TypeScript, Tailwind CSS, Prisma ORM, and PostgreSQL. The project has a premium UI skeleton with a design token system (Deep Teal + Lavender themes), and a production-ready database schema.
 
 ## Recent Changes
+- 2026-02-12: Grade Package Cards in Course Section
+  - Seeded 3 grade packages: Grade 6 ($149/$99), Grade 7 ($159/$109), Grade 8 ($169/$119)
+  - CourseCard: "Grade Package" badge, "All Subjects Included" subtitle, "Buy Grade Pack" CTA
+  - Grade pack click shows info modal (payment not connected yet)
+  - Offerings API returns 12 items: 9 subjects + 3 grade packs
 - 2026-02-12: CAD Currency + Premium Price Block
   - lib/utils/format-money.ts: formatMoney (CAD via Intl.NumberFormat) + computeDiscount helper
   - PriceBlock component: MRP (strikethrough) + sale price (bold) + discount % pill (subtle)
