@@ -11,10 +11,12 @@ interface LiveSession {
   description: string | null;
   sessionType: string;
   category: string;
+  mode: string;
   maxStudents: number;
   pricePerSlot: number;
   scheduledAt: string;
   durationMins: number;
+  meetingUrl: string | null;
   isActive: boolean;
   _count: { bookings: number };
 }
@@ -35,6 +37,7 @@ export default function AdminSessionsPage() {
     pricePerSlot: "0",
     scheduledAt: "",
     durationMins: "60",
+    meetingUrl: "",
   });
 
   const fetchSessions = () => {
@@ -76,6 +79,7 @@ export default function AdminSessionsPage() {
           pricePerSlot: "0",
           scheduledAt: "",
           durationMins: "60",
+          meetingUrl: "",
         });
         fetchSessions();
       } else {
@@ -88,7 +92,11 @@ export default function AdminSessionsPage() {
     }
   };
 
-  const toggleActive = async (id: string, isActive: boolean) => {
+  const toggleActive = async (id: string, isActive: boolean, meetingUrl: string | null) => {
+    if (isActive && !meetingUrl) {
+      setMessage({ type: "error", text: "Cannot activate a session without a meeting link. Please add a Zoom/Meet URL first." });
+      return;
+    }
     await fetch("/api/admin/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -221,6 +229,28 @@ export default function AdminSessionsPage() {
             hint={form.category === "vedic" ? "Vedic uses pass credits (set 0)" : ""}
           />
 
+          <div className="mt-4">
+            <Input
+              label="Meeting URL"
+              type="url"
+              value={form.meetingUrl}
+              onChange={(e) => setForm((f) => ({ ...f, meetingUrl: e.target.value }))}
+              placeholder="https://zoom.us/j/... or https://meet.google.com/..."
+              hint="Sessions are Online LIVE only. Share Zoom/Meet link here."
+            />
+          </div>
+
+          <div
+            className="flex items-center gap-2 mt-3 px-3 py-2 rounded-lg text-xs"
+            style={{ backgroundColor: "var(--primary-soft)", color: "var(--primary)" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <path d="M8 21h8M12 17v4" />
+            </svg>
+            All sessions are Online LIVE (Remote Only). No onsite sessions are supported.
+          </div>
+
           <div className="flex justify-end mt-4">
             <Button onClick={handleCreate} loading={saving}>
               Create Session
@@ -241,7 +271,7 @@ export default function AdminSessionsPage() {
             <Card key={s.id}>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
                     <h3 className="text-sm font-semibold" style={{ color: "var(--text)" }}>
                       {s.title}
                     </h3>
@@ -254,6 +284,20 @@ export default function AdminSessionsPage() {
                     >
                       {s.category === "vedic" ? "Vedic Maths" : "General"}
                     </span>
+                    <span
+                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                      style={{ backgroundColor: "var(--primary-soft)", color: "var(--primary)" }}
+                    >
+                      Online LIVE
+                    </span>
+                    {!s.meetingUrl && (
+                      <span
+                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
+                      >
+                        Missing link
+                      </span>
+                    )}
                     {!s.isActive && (
                       <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full" style={{ backgroundColor: "#FEE2E2", color: "#991B1B" }}>
                         Inactive
@@ -273,7 +317,7 @@ export default function AdminSessionsPage() {
                 </div>
                 <Button
                   variant="ghost"
-                  onClick={() => toggleActive(s.id, !s.isActive)}
+                  onClick={() => toggleActive(s.id, !s.isActive, s.meetingUrl)}
                   style={{ fontSize: "12px", padding: "4px 10px" }}
                 >
                   {s.isActive ? "Deactivate" : "Activate"}

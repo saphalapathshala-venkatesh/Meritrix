@@ -31,6 +31,10 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum SessionMode {
+  ONLINE_LIVE
+}
+
 enum PassType {
   VEDIC_MATHS
 }
@@ -271,6 +275,7 @@ model LiveSession {
   description  String?
   sessionType  SessionType @default(ONE_ON_ONE)
   category     String      @default("general")
+  mode         SessionMode @default(ONLINE_LIVE)
   maxStudents  Int         @default(1)
   pricePerSlot Int
   scheduledAt  DateTime
@@ -286,16 +291,18 @@ model LiveSession {
 }
 
 model LiveBooking {
-  id            String        @id @default(cuid())
-  userId        String
-  liveSessionId String
-  status        BookingStatus @default(PENDING)
-  amountPaid    Int
-  paymentStatus PaymentStatus @default(PENDING)
-  paymentRef    String?
-  couponId      String?
-  passId        String?
-  bookedAt      DateTime      @default(now())
+  id              String        @id @default(cuid())
+  userId          String
+  liveSessionId   String
+  status          BookingStatus @default(PENDING)
+  amountPaid      Int
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentRef      String?
+  couponId        String?
+  passId          String?
+  termsVersion    String        @default("v1")
+  termsAcceptedAt DateTime?
+  bookedAt        DateTime      @default(now())
 
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   liveSession LiveSession  @relation(fields: [liveSessionId], references: [id], onDelete: Cascade)

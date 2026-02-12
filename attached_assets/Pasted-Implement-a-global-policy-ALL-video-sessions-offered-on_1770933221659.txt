@@ -1,0 +1,70 @@
+Implement a global policy: ALL video sessions offered on this platform are 100% ONLINE LIVE only (no onsite / in-person sessions). This must be communicated clearly in UI + Terms, and enforced in data/admin so we never accidentally create “offline” sessions.
+
+Constraints:
+- Do not break existing auth, worksheets, purchases, Razorpay, or Vedic pass work-in-progress.
+- Keep UI premium, calm, and clean (no red warnings).
+- Make changes minimal, additive, and safe.
+
+A) Data & Enforcement (minimal)
+1) Update Prisma schema:
+   - In LiveSession model add:
+     - mode String @default("ONLINE_LIVE")
+   - (Optional but preferred) add enum:
+     - enum SessionMode { ONLINE_LIVE }
+     - LiveSession.mode SessionMode @default(ONLINE_LIVE)
+   - Do NOT add any offline mode.
+2) Run migration and regenerate Prisma client.
+3) Update any LiveSession creation logic (admin APIs/forms) to always set mode = ONLINE_LIVE.
+   - Remove/disable any “location” or “venue” fields for live sessions if they exist.
+   - Ensure meetingUrl remains the only delivery method.
+
+B) Admin UI hardening
+1) In Admin → Live Sessions create/edit:
+   - Remove any UI that implies offline/onsite (location input, “in-person” labels).
+   - Add a small helper note near meetingUrl:
+     - “Sessions are Online LIVE only. Share Zoom/Meet link here.”
+   - If meetingUrl is empty, show a calm validation message (do not allow publishing/activating without meetingUrl for sessions that are scheduled soon).
+2) Ensure existing sessions without meetingUrl are still editable (don’t crash), but show a “Missing link” badge and prevent activation until added.
+
+C) Student UI communication (clear, premium)
+1) Wherever we show session booking / session details / checkout:
+   - Add a consistent “Delivery mode” line:
+     - “Delivery: Online LIVE (Remote Only)”
+   - Do this on:
+     - Session booking page(s)
+     - Session detail modal/card (if exists)
+     - Booking confirmation screen
+     - Receipt/summary card after purchase (if shown)
+2) Add a small “Online LIVE only” pill/badge in the session cards list header (subtle theme color).
+
+D) Terms & Conditions (global)
+1) Add a single global terms section (reusable component/modal) that states:
+   - “All sessions are conducted strictly Online LIVE. We do not offer onsite/in-person classes.”
+   - “Students must have stable internet, a device, and be able to join via the provided meeting link.”
+2) Add a link “Terms & Session Policy” on all session booking/purchase pages.
+3) If there is a checkbox acceptance gate for any session purchase flow:
+   - Keep it, but ensure the checkbox text is global (applies to all sessions, not only Vedic).
+   - Store acceptance in DB for future audit:
+     - Add to LiveBooking (or purchase record) fields:
+       - termsVersion String @default("v1")
+       - termsAcceptedAt DateTime?
+     - Store only once per booking/purchase event.
+
+E) UX copy (exact phrasing)
+Use consistent text everywhere:
+- “Online LIVE (Remote Only)”
+- “No onsite / in-person sessions are offered.”
+
+F) Verification
+After implementation, verify:
+- Admin cannot create any “offline” session mode (only ONLINE_LIVE exists).
+- Session pages clearly communicate online-only.
+- Nothing breaks on existing sessions or bookings.
+- Booking/purchase flows still work.
+
+Deliverables:
+- Updated schema + migration
+- Admin live session UI updated
+- Student session pages updated with “Online LIVE only” messaging
+- Global terms/policy component added and reused
+- List of all files changed at the end

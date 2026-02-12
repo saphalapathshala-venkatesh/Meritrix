@@ -4,6 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Button from "../../_components/Button";
 import Modal from "../../_components/Modal";
+import {
+  OnlineLiveBadge,
+  DeliveryModeLine,
+  SessionTermsLink,
+  SessionPolicyModal,
+  useSessionPolicyModal,
+} from "../../_components/SessionPolicy";
 import { loadRazorpayScript, openRazorpayCheckout } from "../../../lib/razorpay-checkout";
 
 interface VedicProduct {
@@ -40,12 +47,12 @@ function formatCents(cents: number): string {
 
 export default function VedicMathsPage() {
   const router = useRouter();
+  const policyModal = useSessionPolicyModal();
   const [product, setProduct] = useState<VedicProduct | null>(null);
   const [sessions, setSessions] = useState<VedicSession[]>([]);
   const [passInfo, setPassInfo] = useState<PassInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [termsChecked, setTermsChecked] = useState(false);
-  const [termsModal, setTermsModal] = useState(false);
   const [buying, setBuying] = useState(false);
   const [resultModal, setResultModal] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [bookingId, setBookingId] = useState<string | null>(null);
@@ -213,12 +220,15 @@ export default function VedicMathsPage() {
     <>
       <section className="mx-section">
         <div className="mx-container text-center">
-          <span
-            className="inline-block text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full mb-4"
-            style={{ backgroundColor: "rgba(139, 92, 246, 0.1)", color: "#7C3AED" }}
-          >
-            Live Sessions
-          </span>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span
+              className="inline-block text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full"
+              style={{ backgroundColor: "rgba(139, 92, 246, 0.1)", color: "#7C3AED" }}
+            >
+              Live Sessions
+            </span>
+            <OnlineLiveBadge size="xs" />
+          </div>
           <h1
             className="text-3xl md:text-4xl font-bold tracking-tight leading-tight"
             style={{ color: "var(--text)" }}
@@ -233,6 +243,9 @@ export default function VedicMathsPage() {
           >
             Short 30-minute sessions &bull; Small groups & 1:1 &bull; Multiple sessions after one-time pass purchase
           </p>
+          <div className="flex justify-center mt-3">
+            <DeliveryModeLine />
+          </div>
         </div>
       </section>
 
@@ -304,9 +317,10 @@ export default function VedicMathsPage() {
                     </svg>
                     Each session: {product.durationMins} minutes
                   </div>
+                  <DeliveryModeLine />
                 </div>
 
-                <label className="flex items-start gap-2 mb-4 cursor-pointer">
+                <label className="flex items-start gap-2 mb-3 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={termsChecked}
@@ -315,14 +329,8 @@ export default function VedicMathsPage() {
                   />
                   <span className="text-xs leading-relaxed" style={{ color: "var(--text-2)" }}>
                     I agree to the{" "}
-                    <button
-                      type="button"
-                      onClick={() => setTermsModal(true)}
-                      className="underline font-medium cursor-pointer"
-                      style={{ color: "var(--primary)" }}
-                    >
-                      Terms & Cancellation/Reschedule Policy
-                    </button>
+                    <SessionTermsLink onClick={policyModal.show} />
+                    {" "}— all sessions are Online LIVE (Remote Only).
                   </span>
                 </label>
 
@@ -384,6 +392,10 @@ export default function VedicMathsPage() {
                 ))}
               </ul>
             </div>
+
+            <div className="text-center pt-2">
+              <SessionTermsLink onClick={policyModal.show} />
+            </div>
           </div>
         </div>
       </section>
@@ -391,43 +403,51 @@ export default function VedicMathsPage() {
       {sessions.length > 0 && (
         <section className="mx-section" style={{ paddingTop: 0 }}>
           <div className="mx-container max-w-lg">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text)" }}>
-              Upcoming Vedic Maths Sessions
-            </h2>
+            <div className="flex items-center gap-2.5 mb-4">
+              <h2 className="text-lg font-semibold" style={{ color: "var(--text)" }}>
+                Upcoming Vedic Maths Sessions
+              </h2>
+              <OnlineLiveBadge size="xs" />
+            </div>
             <div className="flex flex-col gap-3">
               {sessions.map((s) => (
                 <div
                   key={s.id}
-                  className="rounded-xl p-4 flex items-center justify-between"
+                  className="rounded-xl p-4"
                   style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
                 >
-                  <div>
-                    <p className="text-sm font-medium" style={{ color: "var(--text)" }}>
-                      {s.title}
-                    </p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--text-2)" }}>
-                      {new Date(s.scheduledAt).toLocaleDateString("en-CA", {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                      {" · "}{s.durationMins} min · {s.spotsLeft} spot{s.spotsLeft !== 1 ? "s" : ""} left
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium" style={{ color: "var(--text)" }}>
+                        {s.title}
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color: "var(--text-2)" }}>
+                        {new Date(s.scheduledAt).toLocaleDateString("en-CA", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                        {" · "}{s.durationMins} min · {s.spotsLeft} spot{s.spotsLeft !== 1 ? "s" : ""} left
+                      </p>
+                      <div className="mt-1.5">
+                        <DeliveryModeLine />
+                      </div>
+                    </div>
+                    {hasActivePass && s.spotsLeft > 0 ? (
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleBook(s.id)}
+                        loading={bookingId === s.id}
+                        style={{ fontSize: "12px", padding: "6px 14px" }}
+                      >
+                        Book using pass
+                      </Button>
+                    ) : s.spotsLeft <= 0 ? (
+                      <span className="text-xs font-medium" style={{ color: "var(--muted)" }}>Full</span>
+                    ) : null}
                   </div>
-                  {hasActivePass && s.spotsLeft > 0 ? (
-                    <Button
-                      variant="secondary"
-                      onClick={() => handleBook(s.id)}
-                      loading={bookingId === s.id}
-                      style={{ fontSize: "12px", padding: "6px 14px" }}
-                    >
-                      Book using pass
-                    </Button>
-                  ) : s.spotsLeft <= 0 ? (
-                    <span className="text-xs font-medium" style={{ color: "var(--muted)" }}>Full</span>
-                  ) : null}
                 </div>
               ))}
             </div>
@@ -435,37 +455,7 @@ export default function VedicMathsPage() {
         </section>
       )}
 
-      <Modal
-        open={termsModal}
-        onClose={() => setTermsModal(false)}
-        title="Terms & Cancellation/Reschedule Policy"
-      >
-        <div className="text-sm space-y-4" style={{ color: "var(--text-2)" }}>
-          <div>
-            <h4 className="font-semibold mb-1" style={{ color: "var(--text)" }}>Terms of Service</h4>
-            <p>By purchasing a Vedic Maths Live Pass, you agree to the following terms. The pass grants you a set number of live session credits as described at the time of purchase. Credits are non-transferable and non-refundable after purchase.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-1" style={{ color: "var(--text)" }}>Cancellation Policy</h4>
-            <ul className="list-disc pl-4 space-y-1">
-              <li>Cancel at least 4 hours before the scheduled session for a credit refund.</li>
-              <li>Late cancellations (under 4 hours) will consume one session credit.</li>
-              <li>No-shows will consume one session credit.</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-1" style={{ color: "var(--text)" }}>Reschedule Policy</h4>
-            <ul className="list-disc pl-4 space-y-1">
-              <li>Reschedule at least 4 hours before the session at no extra cost.</li>
-              <li>Subject to tutor availability for the new time slot.</li>
-              <li>Each session may be rescheduled once.</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex justify-end mt-6">
-          <Button onClick={() => setTermsModal(false)}>Close</Button>
-        </div>
-      </Modal>
+      <SessionPolicyModal open={policyModal.open} onClose={policyModal.hide} />
 
       <Modal
         open={!!resultModal}

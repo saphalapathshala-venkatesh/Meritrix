@@ -24,6 +24,18 @@ Meritrix is built on a modern web stack utilizing Next.js 16 with the App Router
 - **UI/UX Design:** Emphasizes a premium SaaS aesthetic with calm, elegant design, using slate-like tones instead of pure black. Custom components are built to maintain a consistent look and feel without external UI libraries. Theme toggling is restricted to colors, preserving layout and typography.
 - **Currency Handling:** Supports CAD currency formatting across the platform using `Intl.NumberFormat` and a `PriceBlock` component for consistent display of MRP, sale prices, and discounts.
 
+## Recent Changes
+- 2026-02-12: Global Online LIVE Only Policy
+  - Schema: SessionMode enum (ONLINE_LIVE only), mode field on LiveSession, termsVersion + termsAcceptedAt on LiveBooking
+  - SessionPolicy component (app/_components/SessionPolicy.tsx): reusable OnlineLiveBadge, DeliveryModeLine, SessionTermsLink, SessionPolicyModal
+  - Admin sessions: meetingUrl input with helper, "Missing link" badge, server-side activation guard
+  - Student /vedic-maths: Online LIVE badge + delivery mode line throughout, global terms modal, terms acceptance stored on booking
+- 2026-02-12: Senior Vedic Maths + Live Pass System
+  - PassProduct/SessionPass models for credit-based session booking
+  - Admin /admin/passes and /admin/sessions with category dropdown
+  - Student /vedic-maths page with Razorpay purchase flow
+  - "Content coming soon" empty states for grades/subjects with no content
+
 ## External Dependencies
 - **PostgreSQL:** Primary database, hosted via Neon.
 - **Prisma ORM:** Used for database interaction and schema management.

@@ -61,6 +61,8 @@ export async function POST(request: Request) {
           amountPaid: 0,
           paymentStatus: "SUCCESS",
           passId: pass.id,
+          termsVersion: "v1",
+          termsAcceptedAt: new Date(),
         },
       }),
       prisma.sessionPass.update({

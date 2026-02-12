@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const { action } = body;
 
     if (action === "create") {
-      const { title, description, sessionType, category, maxStudents, pricePerSlot, scheduledAt, durationMins } = body;
+      const { title, description, sessionType, category, maxStudents, pricePerSlot, scheduledAt, durationMins, meetingUrl } = body;
 
       if (!title || !scheduledAt) {
         return NextResponse.json({ error: "Title and scheduled time are required." }, { status: 400 });
@@ -42,10 +42,12 @@ export async function POST(request: NextRequest) {
           description: description || null,
           sessionType: sessionType || "ONE_ON_ONE",
           category: category || "general",
+          mode: "ONLINE_LIVE",
           maxStudents: Number(maxStudents) || 1,
           pricePerSlot: Number(pricePerSlot) || 0,
           scheduledAt: new Date(scheduledAt),
           durationMins: Number(durationMins) || 60,
+          meetingUrl: meetingUrl || null,
         },
       });
 
@@ -54,6 +56,15 @@ export async function POST(request: NextRequest) {
 
     if (action === "toggle") {
       const { id, isActive } = body;
+      if (Boolean(isActive)) {
+        const existing = await prisma.liveSession.findUnique({ where: { id } });
+        if (existing && !existing.meetingUrl) {
+          return NextResponse.json(
+            { error: "Cannot activate a session without a meeting link. Add a Zoom/Meet URL first." },
+            { status: 400 }
+          );
+        }
+      }
       const session = await prisma.liveSession.update({
         where: { id },
         data: { isActive: Boolean(isActive) },
