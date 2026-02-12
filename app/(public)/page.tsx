@@ -82,13 +82,13 @@ export default function HomePage() {
             {features.map((f) => (
               <div
                 key={f.title}
-                className="rounded-xl overflow-hidden"
+                className="rounded-xl overflow-hidden flex flex-col"
                 style={{
                   border: "1px solid var(--border)",
                   boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
                 }}
               >
-                <div className="p-6 pb-4" style={{ backgroundColor: "var(--surface)" }}>
+                <div className="p-6" style={{ backgroundColor: "var(--surface)", height: "88px" }}>
                   <div
                     className="h-10 w-10 rounded-lg flex items-center justify-center"
                     style={{
@@ -99,16 +99,16 @@ export default function HomePage() {
                     {f.icon}
                   </div>
                 </div>
-                <div className="px-6 pb-6 pt-3" style={{ backgroundColor: "var(--primary-soft)" }}>
+                <div className="p-6 flex-1 flex flex-col" style={{ backgroundColor: "var(--primary-soft)" }}>
                   <h3
-                    className="text-base font-semibold mb-2"
+                    className="text-base font-semibold mb-3"
                     style={{ color: "var(--text)" }}
                   >
                     {f.title}
                   </h3>
                   <p
-                    className="text-sm leading-relaxed"
-                    style={{ color: "var(--text-2)" }}
+                    className="text-sm flex-1"
+                    style={{ color: "var(--text-2)", lineHeight: "1.75" }}
                   >
                     {f.description}
                   </p>
