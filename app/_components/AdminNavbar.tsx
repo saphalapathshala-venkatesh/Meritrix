@@ -6,10 +6,10 @@ import { useState } from "react";
 
 const links = [
   { label: "Dashboard", href: "/admin" },
-  { label: "Users", href: "#" },
-  { label: "Content", href: "#" },
-  { label: "Analytics", href: "#" },
-  { label: "Settings", href: "#" },
+  { label: "Users", href: "/admin/users" },
+  { label: "Content", href: "/admin/content" },
+  { label: "Packages", href: "/admin/packages" },
+  { label: "Coupons", href: "/admin/coupons" },
 ];
 
 export default function AdminNavbar({ userName }: { userName?: string }) {

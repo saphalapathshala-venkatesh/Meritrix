@@ -4,6 +4,15 @@
 Meritrix is a premium learning platform MVP built with Next.js (App Router), TypeScript, Tailwind CSS, Prisma ORM, and PostgreSQL. The project has a premium UI skeleton with a design token system (Deep Teal + Lavender themes), and a production-ready database schema.
 
 ## Recent Changes
+- 2026-02-12: Full Admin Panel
+  - Admin dashboard with live statistics (users, worksheets, subjects, packages, coupons)
+  - Users management: search, block/unblock, delete, reset password
+  - Content management: hierarchical CRUD for grades → subjects → chapters → worksheets
+  - Packages management: create/edit bundles with subject selection
+  - Coupons management: create/edit discount codes with usage tracking
+  - 8 admin API routes with Zod validation and requireAdminApi guard
+  - Toast notification system (ToastProvider in AdminProviders wrapper)
+  - AdminNavbar updated with Dashboard, Users, Content, Packages, Coupons links
 - 2026-02-12: Worksheets browsing MVP
   - Added isFree field to Worksheet model (migration applied)
   - Seed script: 3 grades x 3 subjects x 3 chapters x 6 worksheets (162 total)
@@ -91,8 +100,14 @@ app/
       page.tsx            # Grade selector + subject grid
       [subjectId]/page.tsx # Chapter cards + tiered worksheets
   (admin)/
-    layout.tsx            # AdminNavbar
-    admin/page.tsx        # Admin dashboard
+    layout.tsx            # AdminNavbar + requireAdmin() guard + AdminProviders
+    providers.tsx         # Client-side providers (ToastProvider)
+    admin/
+      page.tsx            # Admin dashboard with live stats + quick links
+      users/page.tsx      # User management (search, block, delete, reset password)
+      content/page.tsx    # Hierarchical content CRUD (grades→subjects→chapters→worksheets)
+      packages/page.tsx   # Package bundles management
+      coupons/page.tsx    # Coupon discount codes management
   api/
     auth/
       register/route.ts   # POST: create user + session
@@ -105,10 +120,20 @@ app/
       subjects/route.ts   # GET: subjects by gradeId
       subject/[subjectId]/route.ts  # GET: chapters + worksheets + access + completion
       progress/route.ts   # POST: toggle worksheet completion
+    admin/
+      stats/route.ts      # GET: platform statistics
+      users/route.ts      # GET/POST: user management (block/delete/reset-password)
+      grades/route.ts     # CRUD: grade management
+      subjects/route.ts   # CRUD: subject management
+      chapters/route.ts   # CRUD: chapter management
+      worksheets/route.ts # CRUD: worksheet management
+      packages/route.ts   # CRUD: package management
+      coupons/route.ts    # CRUD: coupon management
 lib/
   prisma.ts               # Prisma client singleton (PrismaPg adapter, hot-reload safe)
   auth.ts                 # Auth helpers: hash, verify, session CRUD, cookies
   guards.ts               # Server-side route guards: requireUser(), requireAdmin()
+  admin-auth.ts           # Admin API guard: requireAdminApi()
 middleware.ts             # Route protection (cookie-presence check, Edge-compatible)
 prisma/
   schema.prisma           # Full data model

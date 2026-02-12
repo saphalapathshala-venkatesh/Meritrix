@@ -1,0 +1,77 @@
+Build Admin MVP for Meritrix. This is Phase B after worksheets.
+
+Constraints:
+- Do NOT change student UI.
+- Do NOT change purchase logic.
+- Do NOT change schema except if absolutely needed (avoid migrations).
+- All admin routes must be protected by requireAdmin() at layout level.
+- Keep UI premium and minimal, consistent with current design system.
+
+Admin Pages to Create:
+
+1) /app/(admin)/admin/page.tsx
+- Admin home dashboard with quick links:
+  Users, Content, Packages, Coupons
+- Optional: small stats cards (total users, total worksheets published)
+
+2) /app/(admin)/admin/users/page.tsx
+Features:
+- List users (paginated or simple list)
+- Search by email
+- Block/unblock toggle (updates user.isBlocked)
+- Delete user (confirm modal)
+- Optional: Set new password (admin reset)
+
+API routes:
+- GET /api/admin/users?search=...
+- POST /api/admin/users/block (userId, isBlocked)
+- DELETE /api/admin/users/delete (userId)
+- POST /api/admin/users/reset-password (userId, newPassword) optional
+
+3) /app/(admin)/admin/content/page.tsx
+Content Management:
+- Tabs or sections:
+  Grades, Subjects, Chapters, Worksheets
+
+CRUD operations required:
+Grades:
+- create/edit/delete: name, sortOrder
+Subjects:
+- create/edit/delete: gradeId, name, slug, price, sortOrder
+Chapters:
+- create/edit/delete: subjectId, name, slug, sortOrder
+Worksheets:
+- create/edit/delete:
+  chapterId, title, slug, tier, isFree, isPublished, pdfUrl, answerUrl, sortOrder
+
+Tier enforcement (UI validation):
+Only allow: foundational, skill_builder, mastery
+
+API routes:
+- /api/admin/grades (GET, POST, PUT, DELETE)
+- /api/admin/subjects (GET, POST, PUT, DELETE)
+- /api/admin/chapters (GET, POST, PUT, DELETE)
+- /api/admin/worksheets (GET, POST, PUT, DELETE)
+
+4) /app/(admin)/admin/packages/page.tsx
+- Create package: name, slug, price, isActive
+- Select subjects included (multi-select)
+- Edit and deactivate
+API: /api/admin/packages (GET, POST, PUT, DELETE)
+
+5) /app/(admin)/admin/coupons/page.tsx
+- Create coupon: code, discountPercent, maxUses, minAmount, expiresAt, isActive
+- Toggle active
+API: /api/admin/coupons (GET, POST, PUT, DELETE)
+
+Implementation Details:
+- Use Prisma directly in API routes.
+- Validate inputs with Zod.
+- Use clean toast/error messages (no alerts).
+- Use confirm modal for deletes.
+- Keep list tables aligned, no layout gaps.
+
+Output:
+- List created pages and API routes.
+- Confirm admin can create a worksheet, mark isFree=true, isPublished=true, and it instantly appears to students.
+- Confirm blocking a user logs them out on next request (via requireUser clearing session).
