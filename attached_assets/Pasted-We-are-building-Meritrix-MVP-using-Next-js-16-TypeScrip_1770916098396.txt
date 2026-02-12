@@ -1,0 +1,82 @@
+We are building Meritrix MVP using Next.js 16 + TypeScript + Tailwind + Prisma + PostgreSQL.
+
+Goal:
+Set up Prisma with a clean production-ready schema supporting:
+- Users (STUDENT, ADMIN)
+- DB sessions (for one-device login)
+- Grades → Subjects → Chapters → Worksheets
+- Worksheet completion tracking
+- Subject purchases + package purchases
+- Drill packs + attempts tracking
+- Live session booking (1:1 + batch)
+- Coupons
+
+Follow these rules strictly:
+1. Do NOT delete existing app or UI files.
+2. Do NOT reset git.
+3. Do NOT modify Tailwind config.
+4. Only create prisma setup and related files.
+5. Use PostgreSQL.
+6. Ensure Prisma client singleton pattern (avoid hot reload issue).
+7. If prisma folder exists, overwrite schema.prisma only.
+
+STEP 1 — Install Prisma dependencies
+
+Run:
+npm install -D prisma
+npm install @prisma/client
+
+STEP 2 — Initialize Prisma if not already initialized
+
+If prisma folder does not exist:
+npx prisma init
+
+STEP 3 — Replace prisma/schema.prisma with the following exact content:
+
+<PASTE THE FULL SCHEMA I PROVIDED EARLIER HERE>
+
+STEP 4 — Create Prisma client singleton
+
+If /lib folder exists:
+Create file /lib/prisma.ts
+
+Else:
+Create folder /lib and then create prisma.ts inside it.
+
+Content:
+
+--------------------------------------------------
+import { PrismaClient } from "@prisma/client";
+
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: ["error", "warn"],
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
+--------------------------------------------------
+
+STEP 5 — Ensure .env contains:
+
+DATABASE_URL="REPLACE_WITH_YOUR_POSTGRES_URL"
+
+If DATABASE_URL does not exist, add it.
+
+STEP 6 — Run migration
+
+npx prisma migrate dev --name init
+npx prisma generate
+
+If migration fails, do NOT delete database. Fix schema errors instead.
+
+After completion, confirm:
+- Prisma Client generated successfully
+- Migration applied successfully
+- No schema errors
+
+Do not proceed to auth implementation yet.
