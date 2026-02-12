@@ -1,0 +1,70 @@
+Polish the existing Meritrix public homepage UI to meet premium spacing/alignment standards. Keep the same layout and tokens system. Only adjust styling and small component sizing.
+
+TASKS:
+
+1) Public Navbar overlap fix (brand + Home overlap)
+- Ensure brand (Meritrix) and nav links never overlap.
+- Use a proper responsive flex layout:
+  - Left: Brand
+  - Center: Nav links (hidden on small screens if needed)
+  - Right: Theme dots + Create account + Login
+- Add consistent horizontal spacing and prevent squishing:
+  - Use `min-w-0`, `flex-1`, and `gap` properly
+  - Brand should not wrap; nav links should not collide.
+
+2) Theme dots sizing
+- Reduce dot size so they never overlap any buttons.
+- Make each dot ~18px (or smaller) with small ring when active.
+- Keep dots in a compact container with gap 6–8px.
+
+3) Create account button background
+- Change Create account button from white to a mild deep-teal tint background (premium).
+- Use: background = var(--primary-soft), text = var(--primary), border = transparent or var(--border).
+- Keep it secondary style, NOT loud.
+
+4) “3 feature cards” (Worksheets / Merit Drills / Live Sessions) alignment + two-tone card background
+- Problem: text has vague gaps and looks loosely aligned.
+- Fix:
+  - Force consistent card internal layout with a grid/stack:
+    - Icon row fixed height
+    - Title row consistent
+    - Body text consistent
+  - Remove uneven spacing by using:
+    - `gap-3` and consistent `leading-relaxed` or `leading-7`
+    - Same padding for all cards
+- Two-tone requirement:
+  - Top part should remain white so icon stands out.
+  - Below the icon (covering title + text area), apply a mild tinted background similar to the icon badge background.
+  - So card should have:
+    - Top strip (white): contains icon
+    - Bottom area (tinted): contains title + text
+- Implement this by wrapping the card body into two sections, e.g.:
+  - `div` top with `bg-[var(--surface)]`
+  - `div` bottom with `bg-[var(--primary-soft)]` (or a very light neutral teal tint)
+- Make sure tint is subtle and premium.
+
+5) Pricing buttons should all be dark (primary)
+- On pricing cards section, make ALL CTA buttons use the same dark primary style:
+  - bg var(--primary), text var(--on-primary)
+- Remove “light” button style for Free/Team cards.
+
+6) Context note
+- Keep pricing cards content as placeholders; we will rewrite later. For now only update styling to look consistent and premium.
+
+FILES TO EDIT:
+- app/_components/ThemeDots.tsx (reduce dot size + spacing; ensure active ring looks clean)
+- app/_components/PublicNavbar.tsx (fix overlap with proper flex + spacing; ensure right actions never collide)
+- app/(public)/page.tsx (update feature cards to two-tone design + better alignment; update pricing button styles)
+
+IMPORTANT:
+- Do not add new pages or new features.
+- Do not change the global token system.
+- Keep typography premium: no pure black, consistent line height.
+- Ensure everything looks aligned at common widths (desktop + small widths).
+
+After changes:
+- Show final code for:
+  - ThemeDots.tsx
+  - PublicNavbar.tsx (only navbar JSX)
+  - Feature cards section JSX
+  - Pricing buttons JSX

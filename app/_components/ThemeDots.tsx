@@ -31,17 +31,19 @@ export default function ThemeDots() {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5">
       {themes.map((t) => (
         <button
           key={t.id}
           onClick={() => select(t.id)}
-          className="h-5 w-5 rounded-full transition-shadow cursor-pointer"
+          className="rounded-full transition-shadow cursor-pointer"
           style={{
+            width: "18px",
+            height: "18px",
             backgroundColor: t.color,
             boxShadow:
               active === t.id
-                ? `0 0 0 2px var(--surface), 0 0 0 4px ${t.color}`
+                ? `0 0 0 2px var(--surface), 0 0 0 3.5px ${t.color}`
                 : "none",
           }}
           aria-label={t.label}

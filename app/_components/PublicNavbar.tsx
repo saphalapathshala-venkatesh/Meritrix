@@ -23,21 +23,21 @@ export default function PublicNavbar() {
         borderBottom: "1px solid var(--border)",
       }}
     >
-      <nav className="mx-container flex items-center justify-between h-16">
+      <nav className="mx-container flex items-center h-16 gap-8">
         <Link
           href="/"
-          className="text-lg font-bold tracking-tight"
+          className="text-lg font-bold tracking-tight shrink-0"
           style={{ color: "var(--primary)" }}
         >
           Meritrix
         </Link>
 
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-5 flex-1 min-w-0 justify-center">
           {links.map((l) => (
             <Link
               key={l.label}
               href={l.href}
-              className="text-sm font-medium transition-colors hover:opacity-80"
+              className="text-sm font-medium transition-colors hover:opacity-80 whitespace-nowrap"
               style={{ color: "var(--text-2)" }}
             >
               {l.label}
@@ -45,14 +45,14 @@ export default function PublicNavbar() {
           ))}
         </div>
 
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-3 shrink-0">
           <ThemeDots />
           <Link
             href="/signup"
-            className="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+            className="rounded-lg px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap"
             style={{
-              backgroundColor: "var(--surface)",
-              color: "var(--text-2)",
+              backgroundColor: "var(--primary-soft)",
+              color: "var(--primary)",
               border: "1px solid var(--border)",
             }}
           >
@@ -60,7 +60,7 @@ export default function PublicNavbar() {
           </Link>
           <Link
             href="/login"
-            className="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+            className="rounded-lg px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap"
             style={{
               backgroundColor: "var(--primary)",
               color: "var(--on-primary)",
@@ -72,7 +72,7 @@ export default function PublicNavbar() {
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden rounded-lg p-2 hover:bg-[#F1F5F9] transition-colors cursor-pointer"
+          className="md:hidden rounded-lg p-2 hover:bg-[#F1F5F9] transition-colors cursor-pointer ml-auto"
           style={{ color: "var(--text-2)" }}
           aria-label="Toggle menu"
         >
@@ -108,8 +108,8 @@ export default function PublicNavbar() {
               href="/signup"
               className="rounded-lg px-4 py-2 text-sm font-medium"
               style={{
-                backgroundColor: "var(--surface)",
-                color: "var(--text-2)",
+                backgroundColor: "var(--primary-soft)",
+                color: "var(--primary)",
                 border: "1px solid var(--border)",
               }}
             >

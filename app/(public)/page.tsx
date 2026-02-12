@@ -1,5 +1,4 @@
 import Button from "../_components/Button";
-import { Card, CardBody } from "../_components/Card";
 
 const features = [
   {
@@ -39,9 +38,9 @@ const features = [
 ];
 
 const plans = [
-  { name: "Free", price: "$0", features: "5 worksheets / month, basic drills" },
-  { name: "Pro", price: "$12", features: "Unlimited access, analytics, priority support" },
-  { name: "Team", price: "$29", features: "Everything in Pro + admin tools, bulk licenses" },
+  { name: "Free", price: "$0", features: "5 worksheets / month, basic drills", cta: "Start free" },
+  { name: "Pro", price: "$12", features: "Unlimited access, analytics, priority support", cta: "Get started" },
+  { name: "Team", price: "$29", features: "Everything in Pro + admin tools, bulk licenses", cta: "Get started" },
 ];
 
 export default function HomePage() {
@@ -81,10 +80,17 @@ export default function HomePage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             {features.map((f) => (
-              <Card key={f.title}>
-                <CardBody>
+              <div
+                key={f.title}
+                className="rounded-xl overflow-hidden"
+                style={{
+                  border: "1px solid var(--border)",
+                  boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
+                }}
+              >
+                <div className="p-6 pb-4" style={{ backgroundColor: "var(--surface)" }}>
                   <div
-                    className="h-10 w-10 rounded-lg flex items-center justify-center mb-4"
+                    className="h-10 w-10 rounded-lg flex items-center justify-center"
                     style={{
                       backgroundColor: "var(--primary-soft)",
                       color: "var(--primary)",
@@ -92,17 +98,22 @@ export default function HomePage() {
                   >
                     {f.icon}
                   </div>
+                </div>
+                <div className="px-6 pb-6 pt-3" style={{ backgroundColor: "var(--primary-soft)" }}>
                   <h3
                     className="text-base font-semibold mb-2"
                     style={{ color: "var(--text)" }}
                   >
                     {f.title}
                   </h3>
-                  <p className="text-sm leading-relaxed" style={{ color: "var(--text-2)" }}>
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: "var(--text-2)" }}
+                  >
                     {f.description}
                   </p>
-                </CardBody>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -118,37 +129,42 @@ export default function HomePage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             {plans.map((p, i) => (
-              <Card key={p.name} className={i === 1 ? "ring-2" : ""} style={i === 1 ? { "--tw-ring-color": "var(--primary)" } as React.CSSProperties : undefined}>
-                <CardBody>
-                  <p
-                    className="text-sm font-semibold uppercase tracking-wider mb-1"
-                    style={{ color: "var(--primary)" }}
+              <div
+                key={p.name}
+                className="rounded-xl p-6"
+                style={{
+                  backgroundColor: "var(--surface)",
+                  border: i === 1
+                    ? "2px solid var(--primary)"
+                    : "1px solid var(--border)",
+                  boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
+                }}
+              >
+                <p
+                  className="text-sm font-semibold uppercase tracking-wider mb-1"
+                  style={{ color: "var(--primary)" }}
+                >
+                  {p.name}
+                </p>
+                <p
+                  className="text-3xl font-bold mb-1"
+                  style={{ color: "var(--text)" }}
+                >
+                  {p.price}
+                  <span
+                    className="text-sm font-normal ml-1"
+                    style={{ color: "var(--muted)" }}
                   >
-                    {p.name}
-                  </p>
-                  <p
-                    className="text-3xl font-bold mb-1"
-                    style={{ color: "var(--text)" }}
-                  >
-                    {p.price}
-                    <span
-                      className="text-sm font-normal ml-1"
-                      style={{ color: "var(--muted)" }}
-                    >
-                      /mo
-                    </span>
-                  </p>
-                  <p className="text-sm mb-5" style={{ color: "var(--text-2)" }}>
-                    {p.features}
-                  </p>
-                  <Button
-                    variant={i === 1 ? "primary" : "secondary"}
-                    className="w-full"
-                  >
-                    {i === 0 ? "Start free" : "Get started"}
-                  </Button>
-                </CardBody>
-              </Card>
+                    /mo
+                  </span>
+                </p>
+                <p className="text-sm mb-5" style={{ color: "var(--text-2)" }}>
+                  {p.features}
+                </p>
+                <Button className="w-full">
+                  {p.cta}
+                </Button>
+              </div>
             ))}
           </div>
         </div>
