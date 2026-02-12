@@ -1,0 +1,113 @@
+We have already implemented:
+
+- Auth (secure sessions, single-device login)
+- Worksheets + Progress + Admin content system
+- Subject & Package purchases (Razorpay)
+- Senior Vedic Maths Pass system
+- Online LIVE-only sessions
+- Admin session management
+- Session policy enforcement
+
+Before making ANY new architectural changes, I want you to:
+
+------------------------------------------------------------
+PHASE 1 — FULL SYSTEM AUDIT (CRITICAL)
+------------------------------------------------------------
+
+1. Verify ALL existing features work end-to-end:
+   - Auth (register, login, logout, blocked users, session invalidation)
+   - Worksheets browsing
+   - Free vs locked logic
+   - Completion toggle + dashboard progress auto-update
+   - Admin CRUD (grades, subjects, chapters, worksheets)
+   - Subject purchase unlock
+   - Package purchase unlock
+   - Razorpay order creation + verification
+   - Webhook idempotency
+   - Vedic pass purchase
+   - Credit decrement logic
+   - Session booking logic
+   - Admin session activation
+   - Meeting link visibility rules
+   - Online LIVE policy enforcement
+
+2. Explicitly test:
+   - Add worksheet → progress recalculates
+   - Unpublish worksheet → progress recalculates
+   - Delete worksheet with completion → no orphan data
+   - Double booking prevention
+   - Double credit consumption prevention
+   - Meeting link never exposed unless booked
+   - Middleware does not block webhook
+   - No route throws 500
+   - No Prisma drift errors
+   - No race conditions in booking
+
+3. Confirm:
+   - No direct process.env access outside centralized config
+   - No meetingUrl leakage in public endpoints
+   - No unguarded admin routes
+   - No broken migrations
+   - No caching issues in progress calculations
+   - No dependency mismatch (Prisma v7 adapter OK)
+
+4. Provide:
+   - List of tested routes
+   - List of potential weak points
+   - Any silent risks
+   - Any improvements required before production
+
+DO NOT modify code yet.
+Only analyze and report.
+
+------------------------------------------------------------
+PHASE 2 — HARDENING (Only After Audit Pass)
+------------------------------------------------------------
+
+If and ONLY IF audit confirms stability, then implement:
+
+A) Secure meeting URL visibility
+   - Ensure /api/vedic/sessions never exposes meetingUrl
+   - Create /api/my/sessions for booked users only
+   - Confirm strict access control
+
+B) Atomic credit consumption
+   - Wrap booking in Prisma transaction
+   - Enforce usedCredits < totalCredits
+   - Prevent duplicate booking
+   - Return 409 for conflicts
+
+C) My Live Sessions page
+   - Shows only booked sessions
+   - Join button only if meetingUrl exists
+   - Online LIVE badge everywhere
+   - Clean UI
+
+D) Migration Stability
+   - Add prisma validate script
+   - Update replit.md with safe deployment workflow
+   - Confirm schema & DB are consistent
+
+------------------------------------------------------------
+STRICT REQUIREMENTS
+------------------------------------------------------------
+
+- ZERO breaking changes
+- NO DB resets
+- NO deletion of existing migrations
+- NO touching working payment logic
+- Preserve current UI
+- Maintain premium design
+- Maintain Online LIVE-only enforcement
+- Everything must compile and run cleanly
+
+------------------------------------------------------------
+FINAL OUTPUT REQUIRED
+------------------------------------------------------------
+
+1. Audit report
+2. List of potential risks
+3. Confirmation whether production-ready for Feb 26 launch
+4. If not, exact minimal fixes required
+
+Do not proceed blindly. Audit first.
