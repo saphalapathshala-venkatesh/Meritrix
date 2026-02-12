@@ -144,7 +144,11 @@ export default function SubjectDetailPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setPurchaseError(data.error || "Could not create order.");
+        setPurchaseError(
+          res.status === 503
+            ? "Payments are temporarily unavailable. Please try again later."
+            : data.error || "Could not create order."
+        );
         setPurchasing(false);
         return;
       }

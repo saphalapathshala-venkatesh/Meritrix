@@ -1,10 +1,14 @@
 import Razorpay from "razorpay";
 import { createHmac } from "crypto";
+import { getRazorpayConfig } from "../config/env";
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+function createRazorpayInstance() {
+  const config = getRazorpayConfig();
+  return new Razorpay({
+    key_id: config.keyId,
+    key_secret: config.keySecret,
+  });
+}
 
 interface CreateOrderParams {
   amountInPaise: number;
@@ -13,6 +17,7 @@ interface CreateOrderParams {
 }
 
 export async function createRazorpayOrder({ amountInPaise, receipt, notes }: CreateOrderParams) {
+  const razorpay = createRazorpayInstance();
   const order = await razorpay.orders.create({
     amount: amountInPaise,
     currency: "INR",
@@ -29,19 +34,19 @@ interface VerifySignatureParams {
 }
 
 export function verifyRazorpaySignature({ orderId, paymentId, signature }: VerifySignatureParams): boolean {
-  const secret = process.env.RAZORPAY_KEY_SECRET!;
+  const config = getRazorpayConfig();
   const body = `${orderId}|${paymentId}`;
-  const expectedSignature = createHmac("sha256", secret).update(body).digest("hex");
+  const expectedSignature = createHmac("sha256", config.keySecret).update(body).digest("hex");
   return expectedSignature === signature;
 }
 
 export function verifyWebhookSignature(body: string, receivedSignature: string): boolean {
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  if (!secret) return false;
-  const expectedSignature = createHmac("sha256", secret).update(body).digest("hex");
+  const config = getRazorpayConfig();
+  const expectedSignature = createHmac("sha256", config.webhookSecret).update(body).digest("hex");
   return expectedSignature === receivedSignature;
 }
 
 export function getRazorpayKeyId(): string {
-  return process.env.RAZORPAY_KEY_ID!;
+  const config = getRazorpayConfig();
+  return config.keyId;
 }

@@ -155,7 +155,12 @@ export default function HomePage() {
           router.push("/login");
           return;
         }
-        setResultModal({ type: "error", message: data.error || "Could not create order." });
+        setResultModal({
+          type: "error",
+          message: res.status === 503
+            ? "Payments are temporarily unavailable. Please try again later."
+            : data.error || "Could not create order.",
+        });
         setPurchasing(false);
         return;
       }

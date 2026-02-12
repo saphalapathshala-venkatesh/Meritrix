@@ -4,6 +4,14 @@
 Meritrix is a premium learning platform MVP built with Next.js (App Router), TypeScript, Tailwind CSS, Prisma ORM, and PostgreSQL. The project has a premium UI skeleton with a design token system (Deep Teal + Lavender themes), and a production-ready database schema.
 
 ## Recent Changes
+- 2026-02-12: Razorpay Config Hardening
+  - lib/config/env.ts: centralized validated config (getRazorpayConfig, isRazorpayConfigured)
+  - All backend code reads env vars through single config module only
+  - All payment API routes return 503 with friendly message if env vars missing
+  - Frontend handles 503 with "Payments temporarily unavailable" message
+  - GET /api/payments/health: returns { razorpayConfigured, missing } (no secrets exposed)
+  - Webhook route guarded against missing config
+  - No direct process.env.RAZORPAY_* access outside lib/config/env.ts
 - 2026-02-12: Razorpay Payment Integration
   - lib/payments/razorpay.ts: createRazorpayOrder, verifyRazorpaySignature, verifyWebhookSignature
   - lib/razorpay-checkout.ts: client-side loadRazorpayScript + openRazorpayCheckout helper

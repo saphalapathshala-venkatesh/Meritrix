@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import { verifyWebhookSignature } from "../../../../lib/payments/razorpay";
+import { isRazorpayConfigured } from "../../../../lib/config/env";
 
 export async function POST(req: NextRequest) {
   try {
+    const { configured } = isRazorpayConfigured();
+    if (!configured) {
+      console.error("Webhook received but Razorpay env vars are not configured");
+      return NextResponse.json({ error: "Payment gateway not configured" }, { status: 503 });
+    }
+
     const rawBody = await req.text();
     const receivedSignature = req.headers.get("x-razorpay-signature") || "";
 

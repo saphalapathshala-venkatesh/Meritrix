@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromRequest } from "../../../../../lib/auth";
 import { prisma } from "../../../../../lib/prisma";
 import { createRazorpayOrder, getRazorpayKeyId } from "../../../../../lib/payments/razorpay";
+import { isRazorpayConfigured } from "../../../../../lib/config/env";
 
 export async function POST(req: NextRequest) {
   const session = await getSessionFromRequest();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { configured } = isRazorpayConfigured();
+  if (!configured) {
+    return NextResponse.json({ error: "Payments are temporarily unavailable. Please try again later." }, { status: 503 });
   }
 
   try {
