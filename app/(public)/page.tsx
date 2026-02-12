@@ -84,13 +84,14 @@ export default function HomePage() {
                 key={f.title}
                 className="rounded-xl overflow-hidden flex flex-col"
                 style={{
+                  backgroundColor: "var(--surface)",
                   border: "1px solid var(--border)",
                   boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
                 }}
               >
-                <div className="p-6" style={{ backgroundColor: "var(--surface)", height: "88px" }}>
+                <div className="px-6 pt-6 pb-5">
                   <div
-                    className="h-10 w-10 rounded-lg flex items-center justify-center"
+                    className="h-11 w-11 rounded-lg flex items-center justify-center"
                     style={{
                       backgroundColor: "var(--primary-soft)",
                       color: "var(--primary)",
@@ -99,16 +100,19 @@ export default function HomePage() {
                     {f.icon}
                   </div>
                 </div>
-                <div className="p-6 flex-1 flex flex-col" style={{ backgroundColor: "var(--primary-soft)" }}>
+                <div
+                  className="px-6 pb-6 pt-5 flex-1 flex flex-col rounded-t-xl"
+                  style={{ backgroundColor: "var(--primary-soft)" }}
+                >
                   <h3
-                    className="text-base font-semibold mb-3"
-                    style={{ color: "var(--text)" }}
+                    className="text-base font-semibold mb-2"
+                    style={{ color: "var(--text)", lineHeight: "1.4" }}
                   >
                     {f.title}
                   </h3>
                   <p
                     className="text-sm flex-1"
-                    style={{ color: "var(--text-2)", lineHeight: "1.75" }}
+                    style={{ color: "var(--text-2)", lineHeight: "1.7" }}
                   >
                     {f.description}
                   </p>
