@@ -147,8 +147,8 @@ export default function HomePage() {
                     {f.title}
                   </h3>
                   <p
-                    className="text-sm text-pretty leading-7 break-words flex-1"
-                    style={{ color: "var(--text-2)", hyphens: "auto" }}
+                    className="text-sm whitespace-normal break-words min-h-[72px]"
+                    style={{ color: "var(--text-2)", lineHeight: "1.65", hyphens: "auto" }}
                   >
                     {f.description}
                   </p>
