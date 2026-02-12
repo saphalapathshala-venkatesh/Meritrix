@@ -114,11 +114,11 @@ export default function HomePage() {
           >
             Everything you need to excel
           </h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-6 items-stretch">
             {features.map((f) => (
               <div
                 key={f.title}
-                className="rounded-xl overflow-hidden flex flex-col"
+                className="rounded-xl overflow-hidden flex flex-col min-w-0"
                 style={{
                   backgroundColor: "var(--surface)",
                   border: "1px solid var(--border)",
@@ -137,17 +137,17 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div
-                  className="px-6 pb-6 pt-5 flex-1 flex flex-col rounded-t-xl"
+                  className="px-6 pb-6 pt-5 flex-1 flex flex-col min-w-0 rounded-t-xl"
                   style={{ backgroundColor: "var(--primary-soft)" }}
                 >
                   <h3
-                    className="font-semibold text-balance mb-2"
+                    className="font-semibold mb-2"
                     style={{ color: "var(--text)", fontSize: "15px", lineHeight: "1.4" }}
                   >
                     {f.title}
                   </h3>
                   <p
-                    className="text-sm whitespace-normal break-words min-h-[72px]"
+                    className="text-sm break-words min-h-[72px]"
                     style={{ color: "var(--text-2)", lineHeight: "1.65", hyphens: "auto" }}
                   >
                     {f.description}
