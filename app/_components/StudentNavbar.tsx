@@ -12,8 +12,9 @@ const links = [
   { label: "Profile", href: "#" },
 ];
 
-export default function StudentNavbar() {
+export default function StudentNavbar({ userName }: { userName?: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const initial = userName ? userName.charAt(0).toUpperCase() : "S";
 
   return (
     <header
@@ -54,7 +55,7 @@ export default function StudentNavbar() {
               color: "var(--primary)",
             }}
           >
-            S
+            {initial}
           </div>
         </div>
 

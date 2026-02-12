@@ -4,6 +4,13 @@
 Meritrix is a premium learning platform MVP built with Next.js (App Router), TypeScript, Tailwind CSS, Prisma ORM, and PostgreSQL. The project has a premium UI skeleton with a design token system (Deep Teal + Lavender themes), and a production-ready database schema.
 
 ## Recent Changes
+- 2026-02-12: Server-side route protection (guards)
+  - lib/guards.ts: requireUser() and requireAdmin() server-side guards
+  - DB session validation with expiry + isBlocked checks
+  - Invalid/expired/blocked sessions destroyed (row deleted + cookie cleared)
+  - Student layout calls requireUser(), Admin layout calls requireAdmin()
+  - Added isBlocked field to User model (migration applied)
+  - Navbar components accept userName prop, show user initial
 - 2026-02-12: Authentication system (Module A)
   - Register, Login, Logout, Me API routes (app/api/auth/*)
   - bcryptjs password hashing (12 rounds), SHA256 session tokens
@@ -78,6 +85,7 @@ app/
 lib/
   prisma.ts               # Prisma client singleton (PrismaPg adapter, hot-reload safe)
   auth.ts                 # Auth helpers: hash, verify, session CRUD, cookies
+  guards.ts               # Server-side route guards: requireUser(), requireAdmin()
 middleware.ts             # Route protection (cookie-presence check, Edge-compatible)
 prisma/
   schema.prisma           # Full data model

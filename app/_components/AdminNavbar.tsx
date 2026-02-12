@@ -12,8 +12,9 @@ const links = [
   { label: "Settings", href: "#" },
 ];
 
-export default function AdminNavbar() {
+export default function AdminNavbar({ userName }: { userName?: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const initial = userName ? userName.charAt(0).toUpperCase() : "A";
 
   return (
     <header
@@ -65,7 +66,7 @@ export default function AdminNavbar() {
               color: "var(--primary)",
             }}
           >
-            A
+            {initial}
           </div>
         </div>
 
