@@ -2,12 +2,12 @@
 
 :root,
 [data-theme="teal"] {
-  --bg: #F8FAFC;
+  --bg: #F8F4FF;
   --surface: #FFFFFF;
   --border: #E2E8F0;
   --text: #0F172A;
   --text-2: #334155;
-  --muted: #64748B;
+  --muted: #596575;
 
   --primary: #0F5C5C;
   --primary-soft: #E6F4F4;
