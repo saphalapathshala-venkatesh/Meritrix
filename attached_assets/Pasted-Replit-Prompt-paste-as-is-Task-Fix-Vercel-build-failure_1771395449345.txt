@@ -1,0 +1,87 @@
+Replit Prompt (paste as-is)
+
+Task: Fix Vercel build failure: Module not found: Can't resolve '@/app/generated/prisma' coming from lib/prisma.ts. This happens because we are importing PrismaClient from a generated output folder that is not present in Vercel builds. I want a clean, production-safe fix that keeps everything working and avoids future headaches.
+
+Requirements (must follow)
+
+Do not change any UI, routes, business logic, or functionality. Only fix Prisma client import/build reliability.
+
+The app must build successfully on Vercel even if generated prisma client files are not committed.
+
+Keep Prisma v7 working, keep Postgres adapter usage if needed, but the build must not rely on @/app/generated/prisma existing.
+
+Ensure Prisma client is generated automatically during install/build on Vercel.
+
+Do not run destructive DB commands (--force-reset, migrate reset, etc.). This is only a build fix.
+
+What to change
+A) Fix Prisma client generation strategy (remove custom output)
+
+Open prisma/schema.prisma
+
+In the generator client { ... } block:
+
+REMOVE the custom output line:
+
+output = "../app/generated/prisma"
+
+Keep:
+
+provider = "prisma-client-js"
+
+This ensures Prisma generates into the default location used by @prisma/client, which Vercel expects.
+
+B) Fix Prisma import so it always resolves
+
+Open lib/prisma.ts
+
+Replace any import like:
+
+import { PrismaClient } from "@/app/generated/prisma"...
+
+OR @/app/generated/prisma
+
+With:
+
+import { PrismaClient } from "@prisma/client"
+
+If PrismaPg adapter is required, keep it, but ensure PrismaClient import is from @prisma/client.
+
+C) Ensure Vercel always generates Prisma Client during build
+
+Open package.json
+
+Add (or ensure) this script exists:
+
+"postinstall": "prisma generate"
+
+Also ensure build is safe. If needed, update build command to:
+
+"build": "prisma generate && next build"
+(But only do this if build currently doesn’t already generate Prisma.)
+
+D) Verify build locally inside Replit
+
+Run:
+
+npm run build
+
+Confirm no module resolution errors.
+
+Deliverable
+
+Commit-ready changes that:
+
+Fix Vercel build immediately
+
+Do not break runtime
+
+Do not alter product behavior
+
+After implementing, print:
+
+Files changed
+
+Confirmation npm run build succeeded
+
+Any notes for Vercel environment variables (but do not require DB URL for build)
