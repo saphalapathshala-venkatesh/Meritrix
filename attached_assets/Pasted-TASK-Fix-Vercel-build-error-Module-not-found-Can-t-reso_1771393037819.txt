@@ -1,0 +1,64 @@
+TASK: Fix Vercel build error: "Module not found: Can't resolve '@/app/generated/prisma'" in lib/prisma.ts, with ZERO feature changes.
+
+CONTEXT:
+- Current project uses Prisma.
+- Vercel build fails because code imports PrismaClient from "@/app/generated/prisma" (custom output path).
+- On Vercel, Prisma client should be imported from "@prisma/client" (default output).
+- We will NOT add DATABASE_URL now. We only want build to succeed on Vercel first; DB URL will be configured on Vercel after deployment.
+- Do NOT change any UI, routes, auth, payments, or business logic.
+
+GOALS (STRICT):
+1) Update prisma/schema.prisma:
+   - Remove the generator output setting so Prisma uses default output.
+   - Keep: generator client { provider = "prisma-client-js" }
+   - Delete ONLY the `output = ".../app/generated/prisma"` line (or any custom output line).
+   - Do not alter models/enums/relations/fields.
+
+2) Update lib/prisma.ts:
+   - Replace any import like:
+     import { PrismaClient } from "@/app/generated/prisma"
+     OR "@/app/generated/prisma/client"
+     with:
+     import { PrismaClient } from "@prisma/client"
+   - Keep PrismaPg adapter usage and current singleton pattern intact.
+   - Do not change runtime logic; only fix the import path.
+
+3) Ensure dependencies are correct:
+   - Ensure "@prisma/client" is present in dependencies and "prisma" is in devDependencies.
+   - If missing, install them (do not upgrade major versions unnecessarily).
+
+4) Add a Vercel-safe build hook (minimal):
+   - Update package.json scripts so Vercel can generate Prisma client during build.
+   - Set:
+     "build": "prisma generate && next build"
+   - Do NOT run db push/migrate in build (we will add DB later).
+   - Do NOT remove existing scripts; just adjust build safely.
+
+5) Repo hygiene:
+   - Ensure prisma generated artifacts are not committed (keep .gitignore intact).
+   - Do not create app/generated/prisma folder usage anywhere.
+
+6) Verification:
+   - Run locally in Replit:
+     - npm run build
+   - If build fails due to missing DATABASE_URL, then:
+     - Modify build script to:
+       "build": "prisma generate && next build"
+     - And ensure prisma generate does NOT require DB connection.
+   - Confirm the previous module-not-found error is gone.
+
+DELIVERABLE:
+- Only commit the minimal set of changes required to fix the import/output issue and allow Vercel build to pass.
+- Provide a short summary listing changed files and what changed.
+
+FILES LIKELY TO TOUCH:
+- prisma/schema.prisma
+- lib/prisma.ts
+- package.json
+- package-lock.json (if updated)
+
+DO NOT:
+- Change any feature behavior
+- Change database schema (models/enums)
+- Add DATABASE_URL anywhere
+- Touch pages/components unless required for the import fix

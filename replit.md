@@ -25,6 +25,12 @@ Meritrix is built on a modern web stack utilizing Next.js 16 with the App Router
 - **Currency Handling:** Supports CAD currency formatting across the platform using `Intl.NumberFormat` and a `PriceBlock` component for consistent display of MRP, sale prices, and discounts.
 
 ## Recent Changes
+- 2026-02-18: Vercel Build Compatibility Fix
+  - Prisma client import changed from custom `@/app/generated/prisma` to default `@prisma/client`
+  - Removed `output` directive from prisma/schema.prisma generator block
+  - Updated lib/prisma.ts and prisma/seed.ts imports
+  - Build script updated to `prisma generate && next build` for Vercel deployment
+  - Login page wrapped in Suspense boundary for Next.js 16 static prerender compatibility
 - 2026-02-12: Global Online LIVE Only Policy
   - Schema: SessionMode enum (ONLINE_LIVE only), mode field on LiveSession, termsVersion + termsAcceptedAt on LiveBooking
   - SessionPolicy component (app/_components/SessionPolicy.tsx): reusable OnlineLiveBadge, DeliveryModeLine, SessionTermsLink, SessionPolicyModal
